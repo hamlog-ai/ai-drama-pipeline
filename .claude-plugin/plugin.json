@@ -1,0 +1,10 @@
+{
+  "name": "hamlog-ai-drama-pipeline",
+  "description": "AI 숏드라마 제작 풀 파이프라인 — 각본 집필(screenplay-pipeline) → Seedance 컷 프롬프트 변환(seedance-cut-prompt) → 영상 제작 총괄(ai-character-drama) → 후보 보드/QC/조립 운영(drama-ops)까지 스킬 4종.",
+  "version": "1.2.0",
+  "author": {
+    "name": "햄로그 (Hamlog)",
+    "email": "ai.hamlog@gmail.com",
+    "url": "https://github.com/hamlog-ai"
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "name": "hamlog-ai",
+  "owner": {
+    "name": "햄로그 (Hamlog)",
+    "email": "ai.hamlog@gmail.com"
+  },
+  "plugins": [
+    {
+      "name": "hamlog-ai-drama-pipeline",
+      "source": "./",
+      "description": "AI 숏드라마 제작 풀 파이프라인 — 각본 집필 → Seedance 컷 프롬프트 → 영상 제작 → QC/조립 운영까지 스킬 4종"
+    }
+  ]
+}
