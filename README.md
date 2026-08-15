@@ -1,5 +1,7 @@
 # 🎬 AI Drama Pipeline — 햄로그(Hamlog) 마켓플레이스
 
+🌍 [English README](README.en.md)
+
 **스토리 아이디어 하나로 AI 숏드라마 완성본까지.**
 "각본 → 컷 프롬프트 → 영상 렌더 → QC → 조립"의 전 과정을 커버하는
 Claude Code 스킬 4종 세트입니다.
