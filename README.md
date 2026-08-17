@@ -6,7 +6,49 @@
 "각본 → 컷 프롬프트 → 영상 렌더 → QC → 조립"의 전 과정을 커버하는
 Claude Code 스킬 4종 세트입니다.
 
-> Claude Code에서 명령어 두 줄이면 설치 끝. 아래 [설치](#-설치-2줄이면-끝)로 바로 가세요.
+> 처음이신가요? **Claude 데스크톱 앱**을 쓰신다면 바로 아래 **「설치 1 — 그림 따라 설치」**,
+> **터미널에서 Claude Code**를 쓰신다면 **「설치 2 — 명령어 2줄」**을 보세요.
+
+## 🖱 설치 1 — Claude 데스크톱 앱에서 그림 따라 설치 (초보자 추천)
+
+터미널을 한 번도 써본 적 없어도 괜찮습니다. **아래 그림 7장을 순서대로 그대로 따라 하면 설치가 끝납니다.**
+(Claude 데스크톱 앱 = [claude.com/download](https://claude.com/download) 에서 받은 앱. Pro 이상 구독 필요)
+
+### 1️⃣ 앱 왼쪽 위 `Code` 탭 → 입력창 옆 `+` 버튼 → `플러그인` → `플러그인 탐색`
+
+![1단계 — + 버튼 → 플러그인 → 플러그인 탐색](docs/images/plugin-install-01.png)
+
+### 2️⃣ `디렉터리` 창이 열리면, 왼쪽에서 `플러그인` 선택 → 오른쪽 위 `+`(마켓플레이스 추가) 클릭
+
+![2단계 — 마켓플레이스 추가 + 버튼](docs/images/plugin-install-02.png)
+
+### 3️⃣ `저장소에서 추가` 클릭
+
+![3단계 — 저장소에서 추가](docs/images/plugin-install-03.png)
+
+### 4️⃣ URL 칸에 아래 주소를 붙여넣고 `동기화` 클릭
+
+```
+https://github.com/hamlog-ai/ai-drama-pipeline
+```
+
+![4단계 — URL 입력 후 동기화](docs/images/plugin-install-04.png)
+
+### 5️⃣ 위쪽 `코드` 탭 → `hamlog-ai` 선택 → `Hamlog ai drama pipeline` 카드 클릭
+
+![5단계 — hamlog-ai 마켓플레이스에서 플러그인 카드 클릭](docs/images/plugin-install-05.png)
+
+### 6️⃣ 오른쪽 위 `설치` 버튼 클릭
+
+![6단계 — 설치 버튼](docs/images/plugin-install-06.png)
+
+### 7️⃣ 설치 확인 — `Code`에서 대화창을 하나 열고 입력창에 `/hamlog-ai` 입력
+
+스킬 4종 목록이 뜨면 **설치 성공**입니다 🎉
+
+![7단계 — /hamlog-ai 입력 시 스킬 목록이 뜨면 성공](docs/images/plugin-install-07.png)
+
+> 목록이 안 뜨면 Claude 앱을 완전히 껐다가 다시 켜고 한 번 더 확인해 보세요.
 
 ## ✨ 무엇을 할 수 있나요?
 
@@ -15,7 +57,7 @@ Claude Code 스킬 4종 세트입니다.
 - "이 대본으로 1분짜리 숏드라마 만들어줘" → 캐릭터 시트 생성부터 컷 렌더, 자막·SFX·나레이션, 최종 조립, BGM까지 **영상 제작 전체**를 총괄합니다.
 - "캐스팅 보드 만들어줘 / QC 뽑아줘 / 컷 합쳐줘" → 후보 비교 보드, 프레임 QC, concat 조립 같은 **반복 작업이 스크립트로 자동화**됩니다.
 
-## 🚀 설치 (2줄이면 끝)
+## ⌨️ 설치 2 — 터미널(Claude Code CLI)에서 명령어 2줄
 
 Claude Code를 열고 아래 두 명령어를 차례로 입력하세요:
 
