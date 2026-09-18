@@ -334,12 +334,20 @@ blocking lock (§2) are enough, and a start frame would fight the new staging.
 4. **Pass it to the render — pick the role by the kind of join:**
    - **Same shot continues** (the camera doesn't cut at the seam; cut N+1 is
      literally "the next 15 seconds of the same take") → `seedance_2_5`,
-     `mode:"omni_reference"`, `medias:[{value:"<media id>", role:"start_image"}, …]`
-     plus the usual character/prop `image_references` (or `<<<id>>>` tags). This
-     pins the first frame pixel-close. **The prompt's opening beat must then
-     describe exactly what is in that frame** — same angle, same pose — and the
-     action starts from it (open mid-action, not from a standstill). Do not ask
-     for a different opening angle; the start frame wins and the prompt loses.
+     `mode:"omni_reference"` (**required** — with `mode` omitted the backend
+     treats the call as t2v and rejects any media with 422; the "leave mode
+     empty" rule only applies when there is no explicit media),
+     `medias:[{value:"<media id>", role:"start_image"}]` plus the usual
+     `<<<id>>>` tags in the prompt — the placeholders are still injected in
+     this mode (verified 2026-09-18, 도어록 cuts 2–8: seam 1→2 near
+     pixel-identical; the echoed params list the media under
+     `reference_images`, which is fine). This pins the first frame pixel-close.
+     **The prompt's opening beat must then describe exactly what is in that
+     frame** — same angle, same pose — and the action starts from it. The
+     proven pattern: `Shot 1 (0.0–1.5s): the exact <shot> described in the
+     first frame, unchanged camera. <one small eye/head move>. HARD CUT.` then
+     the cut's real coverage. Do not ask for a different opening angle; the
+     start frame wins and the prompt loses. Expect ~1.5–2× the t2v render time.
    - **New angle, same space and state** (cut N+1 opens on a hard cut to a
      different shot — reverse, close-up, wider) → do NOT use `start_image` (it
      would force the old angle). Register the frame as a **continuity Element**
