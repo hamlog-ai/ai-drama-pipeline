@@ -331,39 +331,37 @@ blocking lock (§2) are enough, and a start frame would fight the new staging.
    scripts/last_frame.sh videos/cutN.mp4` (try 0.3 → 0.8) and Read again.
 3. **Upload it** — `media_upload` (then `media_confirm` if the flow asks). Keep the
    returned media id + type; a local frame has no `image_job` id.
-4. **Pass it to the render — pick the role by the kind of join:**
-   - **Same shot continues** (the camera doesn't cut at the seam; cut N+1 is
-     literally "the next 15 seconds of the same take") → `seedance_2_5`,
+4. **Pass it to the render — the anchor is for STATE, the seam is hidden by a
+   NEW ANGLE.** (Lesson from 도어록 2026-09-18: opening every cut on the
+   previous cut's exact last frame with `start_image` produced a visible
+   stutter at all 7 seams — the picture stops, re-animates from a still, then
+   hard-cuts again. Viewer verdict: "툭툭 끊긴다".)
+   - **Default — hard cut to a different angle at the seam.** Register the frame
+     as a **continuity Element** (`show_reference_elements` create,
+     `category:"environment"`, name `cutN_end`, `medias` = the uploaded media
+     with its returned type) and tag it in the prompt with an explicit scope
+     line: `<<<cutN_end_id>>> — continuity reference: location geometry,
+     character positions and prop state only, not camera angle`. Then open cut
+     N+1 on a shot that is NOT the previous cut's last shot — a reverse, a
+     wider or tighter size — already mid-action or mid-line. An angle change
+     is what makes a cut invisible; a matched still is what makes it stutter.
+   - **Never end a cut on a static hold and never open one on a hold.** Cut N
+     ends on a movement or the tail of a line; cut N+1 opens with that
+     movement/line already in progress (Hell Grind dialogue-tail seam). No
+     "Hold." as the last beat of a chained cut.
+   - **`start_image` only for a true single continuous take** (a long tracking
+     shot, a walk-and-talk that must not cut) → `seedance_2_5`,
      `mode:"omni_reference"` (**required** — with `mode` omitted the backend
-     treats the call as t2v and rejects any media with 422; the "leave mode
-     empty" rule only applies when there is no explicit media),
-     `medias:[{value:"<media id>", role:"start_image"}]` plus the usual
-     `<<<id>>>` tags in the prompt — the placeholders are still injected in
-     this mode (verified 2026-09-18, 도어록 cuts 2–8: seam 1→2 near
-     pixel-identical; the echoed params list the media under
-     `reference_images`, which is fine). This pins the first frame pixel-close.
-     **The prompt's opening beat must then describe exactly what is in that
-     frame** — same angle, same pose — and the action starts from it. The
-     proven pattern: `Shot 1 (0.0–1.5s): the exact <shot> described in the
-     first frame, unchanged camera. <one small eye/head move>. HARD CUT.` then
-     the cut's real coverage. Do not ask for a different opening angle; the
-     start frame wins and the prompt loses. Expect ~1.5–2× the t2v render time.
-   - **New angle, same space and state** (cut N+1 opens on a hard cut to a
-     different shot — reverse, close-up, wider) → do NOT use `start_image` (it
-     would force the old angle). Register the frame as a **continuity Element**
-     (`show_reference_elements` create, `category:"environment"`, name
-     `cutN_end`, `medias` = the uploaded media with its returned type) and tag it
-     in the prompt with an explicit scope line: `<<<cutN_end_id>>> — continuity
-     reference: location geometry, character positions and prop state only, not
-     camera angle`. On Seedance 2.0 (no `start_image`) this is the only path for
-     both cases.
-   - **Unbroken single take across the seam is the whole point** (a tracking
-     shot, a long walk-and-talk) → consider `mode:"video_extension"`,
-     `extension_mode:"forward"`, the previous cut's video as the reference. It
-     continues the actual footage instead of imitating a frame. It is billed by
-     the source video, ignores `aspect_ratio`, and returns the extended video
-     (re-trim to the new seconds before assembly) — use it only when a hard
-     cut at the seam is unacceptable.
+     treats the call as t2v and rejects media with 422), `medias:[{value:"<media
+     id>", role:"start_image"}]` plus the usual `<<<id>>>` tags (placeholders are
+     still injected; the echo lists the media under `reference_images`). It pins
+     the first frame pixel-close, so the previous cut MUST end mid-motion and
+     the prompt must continue that motion in the first second — otherwise you
+     get the stutter above. Expect ~1.5–2× the t2v render time. For an unbroken
+     take across the seam, `mode:"video_extension"`, `extension_mode:"forward"`
+     on the previous cut's video is the stronger tool (billed by the source
+     video, ignores `aspect_ratio`, returns the extended video — re-trim before
+     assembly).
 5. **Anchor the prompt.** First line of the cut prompt, after the cut header:
    `Frame opens matching the final frame of CUT N: <one-sentence state summary —
    who is where (screen sides), facing which way, camera height/angle, prop
@@ -387,6 +385,12 @@ reason, every cut chained off it is stale: flip `cuts[N+1].status` back to
 (and so on down the chain). Re-rendering only cut N and keeping the old cut N+1
 re-creates exactly the seam jump the chain exists to prevent. The reverse is
 free: re-rendering cut N+1 alone reuses cut N's existing anchor as is.
+
+**Pacing rule for dialogue scenes (same 도어록 lesson).** A 15s cut carries
+2–3 spoken lines, not 1. No shot longer than ~3s without a line or a physical
+action. "She looks from A to B and back" is not a beat unless it is the punch —
+cut it. Budget: 4 shots per 15s with dialogue in at least 3 of them. 120s of
+drama with 11 lines reads as dead air; the chain seams make it worse.
 
 **QC addition.** At §6b, for a chained cut compare its *first* QC frame against
 `continuity/cutN_last.jpg` side by side — same sides, same prop state, same

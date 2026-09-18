@@ -331,14 +331,21 @@ The high-level arc:
    things were left in*, so: wait for cut N to render + pass visual QC, extract its
    last frame with `scripts/last_frame.sh videos/cutN.mp4`, Read the jpg (sharp,
    right sides, right prop state — else `LAST_OFFSET=0.5`), `media_upload` it, and
-   feed it to cut N+1 — as `start_image` (Seedance 2.5, same shot continues) or as
-   a `continuity` Element scoped "geometry, positions and prop state only, not
-   camera angle" (new angle, or Seedance 2.0). First prompt line: *"Frame opens
-   matching the final frame of CUT N: <state summary>"*; the chain's last cut says
+   feed it to cut N+1 as a `continuity` Element scoped "geometry, positions and
+   prop state only, not camera angle" and **open cut N+1 on a DIFFERENT angle,
+   mid-action or mid-line** — the angle change hides the seam. Do NOT open on the
+   previous cut's exact last shot (`start_image`); matched stills stutter at every
+   seam (도어록 2026-09-18). `start_image`/`video_extension` are for a true
+   single continuous take only. Never end a chained cut on a static "Hold." First
+   prompt line: *"Frame opens matching the final frame of CUT N: <state summary>"*
+   (state, not shot); the chain's last cut says
    *"This is the final clip of the scene — nothing follows it."* Record it in
    `cuts[N+1].continuity_ref` (or `null` when deliberately unchained). Chained
    cuts render sequentially; everything else stays parallel. Re-rendering cut N
    invalidates every cut chained after it — re-extract and re-render them too.
+   **Pacing:** a 15s dialogue cut carries 2–3 lines; no shot >3s without a line
+   or an action; reaction-only "looks from A to B" shots are cut unless they are
+   the punch. Silence is written in seconds, not in shots.
    **Make each cut MULTI-SHOT, not one locked-off take — but let the AI direct it.**
    Don't hard-assign shots to fixed second ranges; instead ask for natural coverage
    that follows standard film grammar — e.g. *"edited as a multi-shot scene with
