@@ -17,6 +17,7 @@ When a 30s/60s scene is split into 15s renders, faces stay consistent but camera
 - **Pick the input by the kind of seam** — same shot continues → Seedance 2.5 `start_image` (pins the first frame); hard cut to a new angle → continuity Element scoped to geometry/positions/prop state only, not camera angle; unbroken take required → `video_extension`.
 - **`continuity_ref` in project.json** — per cut: source cut, media id, role. Re-rendering a cut invalidates every cut chained after it → re-extract and re-render.
 - **New QC item** — chained cuts compare their first frame against the previous cut's last frame (`qc.continuity`).
+- **v2.6.1 (production feedback)** — seams open on a **different angle, mid-action**, never by reproducing the previous cut's last shot (`start_image` is for single continuous takes only). No "Hold." endings. **Dialogue-cut pacing floor**: 2–3 lines per 15s, 4–5 shots of 3–4s, no wordless static shot over 3s, a ★TEMPO LOCK★ (every shot cuts within 0.5s of its action/line, one deliberate pause per cut). Sparse source scripts get a dialogue-augmentation pass before prompting.
 
 ## 🆕 v2.5 — Upgraded to the Seedance 2.5 spec
 

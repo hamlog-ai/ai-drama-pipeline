@@ -54,9 +54,21 @@ call, and the subtitle canvas (16:9 → 1280×720 / 9:16 → 720×1280 with
 every composite. (`reframe` exists only to convert a *finished* video to another
 ratio afterwards, not as a substitute for generating natively vertical.)
 
-Write the beat sheet as N cuts of 15s, each with per-second beats and 1–2 short
-dialogue lines. For comedy, the engine is: same trigger → each character reacts
+Write the beat sheet as N cuts of 15s, each with per-second beats and **2–3
+short dialogue lines** (dialogue scenes; 1 line is a floor only for wordless
+action cuts). For comedy, the engine is: same trigger → each character reacts
 in-character differently.
+
+**Dialogue-density check (mandatory before the storyboard).** Count the lines
+in the source script against the runtime: a drama needs ≥2 spoken lines per
+15s cut, and no shot longer than ~3s without a line or a physical action. If
+the source is sparser (도어록 2026-09-18: 11 lines / 120s → "호흡이 너무 길다"),
+run a **dialogue-augmentation pass** and record the choice in
+`CREATIVE_BIBLE.md` + `project.json` (`pacing`): (a) add 1–2 short reaction
+lines per cut that do not change the plot ("...네?", "잠깐만", "누구셔?"),
+or (b) shorten the cuts (10s instead of 15s). Show the augmented beat sheet on
+the casting board's STORY section so the user approves the extra lines with
+the faces.
 
 ## 2. STORYBOARD.md + element matrix (mandatory — gate before any generation)
 

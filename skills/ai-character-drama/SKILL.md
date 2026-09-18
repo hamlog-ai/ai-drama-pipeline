@@ -343,9 +343,13 @@ The high-level arc:
    `cuts[N+1].continuity_ref` (or `null` when deliberately unchained). Chained
    cuts render sequentially; everything else stays parallel. Re-rendering cut N
    invalidates every cut chained after it — re-extract and re-render them too.
-   **Pacing:** a 15s dialogue cut carries 2–3 lines; no shot >3s without a line
-   or an action; reaction-only "looks from A to B" shots are cut unless they are
-   the punch. Silence is written in seconds, not in shots.
+   **Pacing + tempo:** a 15s dialogue cut carries 2–3 lines in 4–5 shots of
+   3–4s (the 3×5s beat budget is for action cuts); no shot >3s without a line or
+   an action; every shot cuts within 0.5s of its action/line ending; pauses
+   between lines under 1s with ONE deliberate beat per cut; the next speaker
+   comes in on the previous line's tail; reaction-only "looks from A to B" shots
+   are cut unless they are the punch. Put a ★TEMPO LOCK★ in POSITIVE LOCKS and
+   "brisk, no dead air" in FORMAT MODE. Silence is written in seconds, not shots.
    **Make each cut MULTI-SHOT, not one locked-off take — but let the AI direct it.**
    Don't hard-assign shots to fixed second ranges; instead ask for natural coverage
    that follows standard film grammar — e.g. *"edited as a multi-shot scene with

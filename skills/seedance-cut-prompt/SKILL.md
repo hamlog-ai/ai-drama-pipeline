@@ -47,7 +47,9 @@ and low." His line, and nothing else: "..."`). 하드 블록 동반: 모두가 �
 
 ## 예산 (넘기면 품질이 무너진다)
 
-- **15초 = 3비트, 비트당 물리적 액션 1개** + (선택) 대사 1줄. 밀도가 아쉬우면 액션 대신 리액션 샷.
+- **15초 = 3비트, 비트당 물리적 액션 1개** + 대사. 밀도가 아쉬우면 액션 대신 리액션 샷 — 단 **리액션 전용 샷은 컷당 1개, 펀치일 때만**.
+- **템포 (2026-09-18 도어록 교훈: "컷이 너무 느려")**: 5초 비트 3개는 액션·VFX 컷용. **대화 컷은 3~4초 샷 4~5개**, 샷은 액션·대사가 끝나는 순간 0.5초 안에 컷, 대사 사이 정적 1초 이내, 의도적 멈춤("한 박자", "a full second passes", "a small swallow before")은 컷당 1회, 다음 화자는 앞 대사 꼬리를 물고 들어온다. FORMAT MODE에 "brisk, no dead air" 선언 + POSITIVE LOCKS ⑦ ★TEMPO LOCK★. "hold / lingers / settles / 여운"이 한 프롬프트에 2회 이상이면 감량.
+- **페이싱 하한 (2026-09-18 도어록 교훈)**: 대화 씬 15초 컷은 **대사 최소 2줄**(상한 3줄 유지), **3초 초과 무대사 정지 샷 금지**, 침묵은 샷이 아니라 초 단위 지시("1초 정적 후")로. 컷 끝을 "Hold."로 맺지 않는다 — 동작이나 대사 꼬리 위에서 컷. 원안 대사가 희박하면 프롬프트 쓰기 전에 대사 보강(플롯 불변 반응 대사 1~2줄/컷) 또는 10초 컷 압축을 제안하고 사용자 승인 후 진행.
 - **대사: 컷당 ≤3줄, 줄당 ≤15음절, 화자 ≤2명, 구어체.** 한국어 발화 속도 초당 5~6음절 기준 — 초과하면 립싱크 붕괴. (DIALOGUE 블록에도 그대로 적용.)
 - 감정은 컷당 하나. 대사엔 연기 부사("flat and deadpan", "whispers")를 붙인다.
 - 추상어 금지: "감동적으로/멋지게" → 몸으로 번역 ("her smile switches off like a light").
@@ -77,13 +79,13 @@ and low." His line, and nothing else: "..."`). 하드 블록 동반: 모두가 �
 - **소품 샷**: 단일 오브젝트, 중앙, 뉴트럴 스튜디오 배경, **재질·라벨·마모 상태**까지 — 재질이 빠지면 컷마다 재질이 바뀐다.
 - **부정문 금지** (플레이트 "no people" 예외). 이미지 모델은 언급된 것을 그린다.
 - 프롬프트 옆에 생성 파라미터도 표기: `gpt_image_2, quality "high", resolution "2k"`, AR(3패널 합본 시트 16:9, 단독 클로즈업만 쓸 땐 1:1 또는 3:4, 플레이트는 프로젝트 AR).
-- continuity reference처럼 **생성이 아니라 업로드**로 만드는 Element는 이미지 프롬프트 대신 추출·업로드 절차를 명시한다.
+- continuity reference처럼 **생성이 아니라 업로드**로 만드는 Element는 이미지 프롬프트 대신 추출·업로드 절차를 명시한다. (앵커는 상태 참조용 — 다음 컷을 같은 샷으로 여는 데 쓰지 않는다.)
 
 **역할 + 통제 범위를 선언하라.** Element를 나열만 하지 말고 셋 중 하나의 역할과 적용 범위를 한 절로 붙인다:
 
 - `identity anchor` — 외형 고정. 범위 제한 가능: `<<<ella>>> — identity anchor, face/hair/dress only`. 발밑 로우앵글 샷이면 하반신만 계약하는 부분 앵커도 가능 ("legs and lower body only: striped socks, black loafers").
 - `location reference` — 공간 기하 고정. **항상 "geometry only, not camera angle"을 붙인다** — 안 붙이면 참조 사진의 구도까지 복제한다.
-- `continuity reference` — 직전 컷의 마지막 프레임. 시작 포즈·카메라 높이·소품 상태를 잇는 접착제 (구조 모드 참조). 추출은 `ai-character-drama/scripts/last_frame.sh`, 업로드는 `media_upload`(로컬 프레임은 image_job이 없다). **투입 방식은 이음새 종류로 고른다**: 같은 샷이 그대로 이어지면 Seedance 2.5 `start_image`(첫 프레임 픽셀 고정 — 이때 프롬프트 첫 비트는 그 프레임 그대로를 서술해야 하고 다른 오프닝 앵글을 요구하면 안 된다), 앵글이 바뀌는 하드컷이면 continuity Element로 등록하고 범위를 "location geometry, character positions and prop state only, not camera angle"로 제한. 전체 절차는 `ai-character-drama/references/workflow.md` §6a.
+- `continuity reference` — 직전 컷의 마지막 프레임. 시작 포즈·카메라 높이·소품 상태를 잇는 접착제 (구조 모드 참조). 추출은 `ai-character-drama/scripts/last_frame.sh`, 업로드는 `media_upload`(로컬 프레임은 image_job이 없다). **기본은 continuity Element** — 범위를 "location geometry, character positions and prop state only, not camera angle"로 제한하고 다음 컷은 다른 앵글로 연다. `start_image`(첫 프레임 픽셀 고정)는 원테이크가 이어지는 경우에만 — 대화 씬에 쓰면 이음새마다 정지→재시동이 생겨 끊긴다(도어록 2026-09-18). 전체 절차는 `ai-character-drama/references/workflow.md` §6a.
 
 참조 사진과 씬의 현재 상태가 다르면 차이를 명시한다: "the room is tidier than the reference photo, no clutter."
 스케일은 미터보다 **인물 대비**가 강할 때가 있다: "a longbow taller than she is" — 절대 치수 대신 상대 비교로 잠그면 드리프트가 준다.
@@ -221,8 +223,8 @@ NEGATIVE           ← 맨 마지막: 금지 태그 나열 (아래 NEGATIVE 규�
   correction" — 기계적 표현(digital jitter, random shake)은 금지, gimbal
   smoothness·floating drone feel은 명시 요청 시에만.
 - **PHYSICS**: "자연스럽게" 대신 역학을 계약: "crouch-launch-land arc with visible weight settling", "not a mechanical repeat", "residual drops falling under gravity". 반복 동작·점프·소품 조작·천·물이 있으면 필수.
-- **POSITIVE LOCKS 구성**: ①주어 수 락 ("Exactly one subject throughout") ②연속성 락 (시작 상태·경로 제한·"the room's interior design does not change") ③트릭 실행 락 ④다음 컷 인계 소품 상태 ("the faucet is still running, carrying into CUT N+1") ⑤IP 가드 ⑥통일 스타일 문자열. 부정문은 **"A, not B" 쌍**으로만 ("a circular vignette, not a rectangular wipe") — 금지만 하지 말고 대안을 같이.
-- **컷 체인 (Anchor-and-Extend)**: 같은 장소에서 시간 점프 없이 이어지는 컷(30초·60초 씬을 15초로 쪼갠 경우는 항상)은 직전 컷 마지막 프레임을 continuity reference로 넣고, 프롬프트 첫 줄을 "Frame opens matching the final frame of CUT N: <누가 어느 쪽에, 어느 방향, 카메라 높이, 소품 상태>"로 시작한다. 직전 컷 POSITIVE LOCKS의 인계 소품 상태를 그대로 받고, 체인 마지막 컷엔 "This is the final clip of the scene — nothing follows it" 선언. 장소가 바뀌거나 시간이 건너뛰거나 일부러 새 설정샷으로 여는 컷은 체인하지 않는다.
+- **POSITIVE LOCKS 구성**: ①주어 수 락 ("Exactly one subject throughout") ②연속성 락 (시작 상태·경로 제한·"the room's interior design does not change") ③트릭 실행 락 ④다음 컷 인계 소품 상태 ("the faucet is still running, carrying into CUT N+1") ⑤IP 가드 ⑥통일 스타일 문자열 ⑦**★TEMPO LOCK★** (대화 컷 필수): "Brisk tempo: every shot ends within 0.5s of its action or line; no lingering holds; pauses between lines under 1s except ONE deliberate beat at <시점>; the next speaker comes in on the tail of the previous line."` 부정문은 **"A, not B" 쌍**으로만 ("a circular vignette, not a rectangular wipe") — 금지만 하지 말고 대안을 같이.
+- **컷 체인 (Anchor-and-Extend)**: 같은 장소에서 시간 점프 없이 이어지는 컷(30초·60초 씬을 15초로 쪼갠 경우는 항상)은 직전 컷 마지막 프레임을 continuity reference **Element**로 넣고(범위: 위치·소품 상태·카메라 높이만, 앵글 제외), 프롬프트 첫 줄을 "Frame opens matching the final frame of CUT N: <누가 어느 쪽에, 어느 방향, 소품 상태>"로 시작한다 — 이건 **상태** 서술이지 샷 재현이 아니다. **다음 컷의 Shot 1은 앞 컷 마지막 샷과 다른 앵글로, 동작이나 대사 중간에서 연다**(이음새는 앵글 전환이 숨긴다). 앞 컷 마지막 프레임을 `start_image`로 걸어 같은 샷을 1~2초 재현하는 방식은 **금지** — 정지→재시동→컷이 이음새마다 반복돼 "툭툭 끊긴다"(도어록 2026-09-18 실측). `start_image`/`video_extension`은 원테이크 연속(트래킹·워크앤톡)에만. 앞 컷은 "Hold."로 끝내지 말고 동작·대사 꼬리로 끝낸다. 직전 컷 POSITIVE LOCKS의 인계 소품 상태를 그대로 받고, 체인 마지막 컷엔 "This is the final clip of the scene — nothing follows it" 선언. 장소가 바뀌거나 시간이 건너뛰거나 일부러 새 설정샷으로 여는 컷은 체인하지 않는다.
 - **변신/모핑은 화면 밖으로**: 중간 단계를 요구하지 말고 오프스크린 처리 ("he goes in, the cat comes out, in one unbroken shot — reads as an in-camera trick rather than an edit").
 
 **리비전 원리**: 결과가 틀리면 프롬프트를 갈아엎지 말고, 모델이 발명한 것을 금지+대안 쌍으로 락 블록에 증축한다. 공간이 복잡해 동선이 붕괴하면 프롬프트를 늘리지 말고 **세계를 단순화**한다 ("a small studio apartment: just two rooms, nothing else"). 증상별 레시피 표는 `higgsfield-structure.md` §8.
