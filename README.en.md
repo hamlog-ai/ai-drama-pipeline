@@ -8,6 +8,16 @@ A set of four Claude Code skills covering the entire pipeline:
 
 🇰🇷 [한국어 README](README.md)
 
+## 🆕 v2.6 — Cut chaining (continuity lock): the previous cut's last frame becomes the next cut's start
+
+When a 30s/60s scene is split into 15s renders, faces stay consistent but camera height, prop state and positions get re-staged per cut, so the assembled scene "jumps" at every seam. That is now a formal pipeline step.
+
+- **`scripts/last_frame.sh`** — extracts the true final frame of a rendered cut into `continuity/` (`LAST_OFFSET` steps back from a fade/blurred ending).
+- **New workflow §6a** — mandatory chain for cuts that continue the same location with no time jump: previous cut rendered + QC passed → extract last frame → upload → feed into the next cut → first prompt line "Frame opens matching the final frame of CUT N: <state summary>".
+- **Pick the input by the kind of seam** — same shot continues → Seedance 2.5 `start_image` (pins the first frame); hard cut to a new angle → continuity Element scoped to geometry/positions/prop state only, not camera angle; unbroken take required → `video_extension`.
+- **`continuity_ref` in project.json** — per cut: source cut, media id, role. Re-rendering a cut invalidates every cut chained after it → re-extract and re-render.
+- **New QC item** — chained cuts compare their first frame against the previous cut's last frame (`qc.continuity`).
+
 ## 🆕 v2.5 — Upgraded to the Seedance 2.5 spec
 
 Validated against a 123-cut feature production in Higgsfield Studio and the official Seedance 2.5 prompting guide.

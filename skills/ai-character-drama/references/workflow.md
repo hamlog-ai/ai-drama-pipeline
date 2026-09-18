@@ -15,7 +15,7 @@ templates alone don't enforce.**
 ```
 project/
   characters/  background/  props/  storyboard/  videos/  sfx/  narration/  subs/
-  music/  qc/
+  music/  qc/  continuity/
   CREATIVE_BIBLE.md  STORYBOARD.md  project.json  README.md
 ```
 Confirm `ffmpeg` and `python3` + Pillow are available.
@@ -208,8 +208,9 @@ or `media_import_url` (already hosted). The upload returns a media id + URL —
 pass those in `medias` with the `type` the upload response reports (it will not
 be `"image_job"`; use the returned media type verbatim). Verify on first use:
 render one cheap test image embedding the new `<<<id>>>` and confirm the real
-product appears before committing any video spend. The same path registers a
-cut's extracted last frame as a continuity reference (higgsfield-structure §7).
+product appears before committing any video spend. The same path uploads a
+cut's extracted last frame for the continuity chain (§6a) — as a `start_image`
+media for Seedance 2.5, or registered as a `continuity` Element on 2.0.
 
 ## 5. Storyboard keyframes — MANDATORY user OK gate before ANY video render
 
@@ -233,7 +234,11 @@ affected keyframes, re-present, and wait again.
 
 ## 6. Cuts — `seedance_2_0` (Seedance 2.0), `genre:"drama"`
 
-Per cut, in parallel. Seedance 2.0 honors `<<<element_id>>>` references for
+Per cut, in parallel — **except chained cuts (§6a): a cut that continues the
+previous cut's location/blocking is submitted only after that previous cut has
+rendered and passed visual QC, because its opening frame comes from that render.**
+Cuts from different scenes (or cuts that open on a new location) still run in
+parallel. Seedance 2.0 honors `<<<element_id>>>` references for
 identity/prop consistency, has a literal `genre:"drama"`, and bakes the characters'
 **lip-synced dialogue** (sets `generate_audio:true` itself):
 ```
@@ -297,6 +302,88 @@ Poll via `show_generations` (type=video) → `results.rawUrl`; download to
   adding `declined_preset_id:"<preset id from the notice>"`.
 - **"Invalid or expired token" / "server isn't responding"**: transient, just retry.
 
+## 6a. Continuity chain — Anchor-and-Extend (mandatory for same-location consecutive cuts)
+
+**When it applies.** Cut N+1 is *chained* to cut N when both are in the same
+`scenes[]` entry (same location) and the story continues without a time jump —
+the second half of a conversation, the next beat of an action, a reaction shot
+in the same room. A 30s or 60s scene split into 15s renders is *always* a chain.
+An Element locks *who* and *where*; it does not lock *the state things were left
+in* — camera height, which hand holds the cup, the half-open door, who is
+standing where. Without the chain Seedance re-stages every cut from scratch and
+the assembled scene jumps at each seam even when every face is right.
+
+**Do not chain** when cut N+1 opens somewhere else, after a time skip, or on a
+deliberately different establishing angle — there the environment Element +
+blocking lock (§2) are enough, and a start frame would fight the new staging.
+
+**Steps, per chained cut (record every field in `cuts[N+1].continuity_ref`):**
+
+1. **Wait for cut N** to reach `rendered` and pass the §6b *visual* check. Never
+   chain off a cut that will be re-rendered — a stale anchor is worse than none.
+2. **Extract the last frame:**
+   ```bash
+   bash scripts/last_frame.sh videos/cutN.mp4      # → continuity/cutN_last.jpg
+   ```
+   **Read the jpg.** It must be a clean, sharp frame with the state you want to
+   carry (right people, right sides, right prop state). If it's black, fading,
+   motion-blurred or mid-transition, step back: `LAST_OFFSET=0.5 bash
+   scripts/last_frame.sh videos/cutN.mp4` (try 0.3 → 0.8) and Read again.
+3. **Upload it** — `media_upload` (then `media_confirm` if the flow asks). Keep the
+   returned media id + type; a local frame has no `image_job` id.
+4. **Pass it to the render — pick the role by the kind of join:**
+   - **Same shot continues** (the camera doesn't cut at the seam; cut N+1 is
+     literally "the next 15 seconds of the same take") → `seedance_2_5`,
+     `mode:"omni_reference"`, `medias:[{value:"<media id>", role:"start_image"}, …]`
+     plus the usual character/prop `image_references` (or `<<<id>>>` tags). This
+     pins the first frame pixel-close. **The prompt's opening beat must then
+     describe exactly what is in that frame** — same angle, same pose — and the
+     action starts from it (open mid-action, not from a standstill). Do not ask
+     for a different opening angle; the start frame wins and the prompt loses.
+   - **New angle, same space and state** (cut N+1 opens on a hard cut to a
+     different shot — reverse, close-up, wider) → do NOT use `start_image` (it
+     would force the old angle). Register the frame as a **continuity Element**
+     (`show_reference_elements` create, `category:"environment"`, name
+     `cutN_end`, `medias` = the uploaded media with its returned type) and tag it
+     in the prompt with an explicit scope line: `<<<cutN_end_id>>> — continuity
+     reference: location geometry, character positions and prop state only, not
+     camera angle`. On Seedance 2.0 (no `start_image`) this is the only path for
+     both cases.
+   - **Unbroken single take across the seam is the whole point** (a tracking
+     shot, a long walk-and-talk) → consider `mode:"video_extension"`,
+     `extension_mode:"forward"`, the previous cut's video as the reference. It
+     continues the actual footage instead of imitating a frame. It is billed by
+     the source video, ignores `aspect_ratio`, and returns the extended video
+     (re-trim to the new seconds before assembly) — use it only when a hard
+     cut at the seam is unacceptable.
+5. **Anchor the prompt.** First line of the cut prompt, after the cut header:
+   `Frame opens matching the final frame of CUT N: <one-sentence state summary —
+   who is where (screen sides), facing which way, camera height/angle, prop
+   state>.` Then paste the scene's blocking lock verbatim (§2) and carry any
+   hand-off locks from cut N's POSITIVE LOCKS ("the faucet is still running").
+   The **last cut of a chain** declares it: `This is the final clip of the scene
+   — nothing follows it.` so the model resolves the beat instead of holding a
+   hand-off pose.
+6. **Record** in `project.json`:
+   ```json
+   "continuity_ref": { "source_cut": 1, "frame": "continuity/cut1_last.jpg",
+     "offset": 0, "media_id": "<id>", "media_type": "<type from upload>",
+     "role": "start_image | element | video_extension", "element_id": null }
+   ```
+   Set `"continuity_ref": null` explicitly on unchained cuts so a resumed session
+   knows the decision was made, not skipped.
+
+**Chain invalidation (partial re-renders).** If cut N is re-rendered for any
+reason, every cut chained off it is stale: flip `cuts[N+1].status` back to
+`pending`, re-extract the frame from the new cut N, re-upload, and re-render N+1
+(and so on down the chain). Re-rendering only cut N and keeping the old cut N+1
+re-creates exactly the seam jump the chain exists to prevent. The reverse is
+free: re-rendering cut N+1 alone reuses cut N's existing anchor as is.
+
+**QC addition.** At §6b, for a chained cut compare its *first* QC frame against
+`continuity/cutN_last.jpg` side by side — same sides, same prop state, same
+camera height — and record the result in `cuts[N+1].qc.continuity`.
+
 ## 6b. QC gate — verify every cut before assembly (mandatory)
 
 Run this on each cut *as it lands* (don't wait for all N). Checks per cut, all
@@ -313,7 +400,10 @@ holding, correct aspect ratio. **Blocking check** (multi-cut same-location
 scenes): compare this cut's frames against the previous cut's — each character
 still on the same screen side, facing the same way, per the scene's blocking
 lock. A left-right swap between cuts is a QC fail even if every face is
-perfect; record it in `cuts[N].qc.blocking`. If a single frame is ambiguous
+perfect; record it in `cuts[N].qc.blocking`. **Continuity check** (chained
+cuts, §6a): put `qc/cutN/f01.jpg` next to `continuity/cut(N-1)_last.jpg` — the
+opening must match the anchor's sides, camera height and prop state; record in
+`cuts[N].qc.continuity`. If a single frame is ambiguous
 ("is that the same bottle?"), run Higgsfield `video_analysis_create` on the cut
 and ask it the specific question via `video_analysis_status`.
 

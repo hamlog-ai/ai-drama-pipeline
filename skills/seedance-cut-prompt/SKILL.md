@@ -83,7 +83,7 @@ and low." His line, and nothing else: "..."`). 하드 블록 동반: 모두가 �
 
 - `identity anchor` — 외형 고정. 범위 제한 가능: `<<<ella>>> — identity anchor, face/hair/dress only`. 발밑 로우앵글 샷이면 하반신만 계약하는 부분 앵커도 가능 ("legs and lower body only: striped socks, black loafers").
 - `location reference` — 공간 기하 고정. **항상 "geometry only, not camera angle"을 붙인다** — 안 붙이면 참조 사진의 구도까지 복제한다.
-- `continuity reference` — 직전 컷의 마지막 프레임. 시작 포즈·카메라 높이·소품 상태를 잇는 접착제 (구조 모드 참조). 등록 방법: 로컬 프레임은 image_job이 없으므로 `media_upload`/`media_import_url`로 올린 뒤 반환된 media id/type으로 등록 — 절차는 `ai-character-drama/references/workflow.md` §4.
+- `continuity reference` — 직전 컷의 마지막 프레임. 시작 포즈·카메라 높이·소품 상태를 잇는 접착제 (구조 모드 참조). 추출은 `ai-character-drama/scripts/last_frame.sh`, 업로드는 `media_upload`(로컬 프레임은 image_job이 없다). **투입 방식은 이음새 종류로 고른다**: 같은 샷이 그대로 이어지면 Seedance 2.5 `start_image`(첫 프레임 픽셀 고정 — 이때 프롬프트 첫 비트는 그 프레임 그대로를 서술해야 하고 다른 오프닝 앵글을 요구하면 안 된다), 앵글이 바뀌는 하드컷이면 continuity Element로 등록하고 범위를 "location geometry, character positions and prop state only, not camera angle"로 제한. 전체 절차는 `ai-character-drama/references/workflow.md` §6a.
 
 참조 사진과 씬의 현재 상태가 다르면 차이를 명시한다: "the room is tidier than the reference photo, no clutter."
 스케일은 미터보다 **인물 대비**가 강할 때가 있다: "a longbow taller than she is" — 절대 치수 대신 상대 비교로 잠그면 드리프트가 준다.
@@ -222,7 +222,7 @@ NEGATIVE           ← 맨 마지막: 금지 태그 나열 (아래 NEGATIVE 규�
   smoothness·floating drone feel은 명시 요청 시에만.
 - **PHYSICS**: "자연스럽게" 대신 역학을 계약: "crouch-launch-land arc with visible weight settling", "not a mechanical repeat", "residual drops falling under gravity". 반복 동작·점프·소품 조작·천·물이 있으면 필수.
 - **POSITIVE LOCKS 구성**: ①주어 수 락 ("Exactly one subject throughout") ②연속성 락 (시작 상태·경로 제한·"the room's interior design does not change") ③트릭 실행 락 ④다음 컷 인계 소품 상태 ("the faucet is still running, carrying into CUT N+1") ⑤IP 가드 ⑥통일 스타일 문자열. 부정문은 **"A, not B" 쌍**으로만 ("a circular vignette, not a rectangular wipe") — 금지만 하지 말고 대안을 같이.
-- **컷 체인 (Anchor-and-Extend)**: 직전 컷 마지막 프레임을 continuity reference Element로 등록하고 FIRST FRAME을 그 상태와 일치시킨다. 마지막 컷엔 "This is the final clip — nothing follows it" 선언.
+- **컷 체인 (Anchor-and-Extend)**: 같은 장소에서 시간 점프 없이 이어지는 컷(30초·60초 씬을 15초로 쪼갠 경우는 항상)은 직전 컷 마지막 프레임을 continuity reference로 넣고, 프롬프트 첫 줄을 "Frame opens matching the final frame of CUT N: <누가 어느 쪽에, 어느 방향, 카메라 높이, 소품 상태>"로 시작한다. 직전 컷 POSITIVE LOCKS의 인계 소품 상태를 그대로 받고, 체인 마지막 컷엔 "This is the final clip of the scene — nothing follows it" 선언. 장소가 바뀌거나 시간이 건너뛰거나 일부러 새 설정샷으로 여는 컷은 체인하지 않는다.
 - **변신/모핑은 화면 밖으로**: 중간 단계를 요구하지 말고 오프스크린 처리 ("he goes in, the cat comes out, in one unbroken shot — reads as an in-camera trick rather than an edit").
 
 **리비전 원리**: 결과가 틀리면 프롬프트를 갈아엎지 말고, 모델이 발명한 것을 금지+대안 쌍으로 락 블록에 증축한다. 공간이 복잡해 동선이 붕괴하면 프롬프트를 늘리지 말고 **세계를 단순화**한다 ("a small studio apartment: just two rooms, nothing else"). 증상별 레시피 표는 `higgsfield-structure.md` §8.

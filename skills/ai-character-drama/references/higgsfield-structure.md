@@ -204,9 +204,12 @@ OPTICS 섹션을 통째로 쓴다.
   follows it. No Anchor-and-Extend hand-off is needed after it."
 - 소품 상태(수도꼭지 틀어짐)를 락으로 다음 클립에 인계한다 (§6-4).
 
-**이식**: 우리 파이프라인에서 컷 N 렌더 후 마지막 프레임을 추출(qc_frames.sh)해
-컷 N+1의 참조 Element로 등록하고, 프롬프트 첫 줄에 "Frame opens matching the
-final frame of CUT N: <상태 요약>"을 넣으면 동일 효과.
+**이식 (정식 단계 — workflow.md §6a)**: 컷 N 렌더·QC 통과 후
+`scripts/last_frame.sh`로 마지막 프레임을 추출하고 `media_upload`로 올린 뒤,
+같은 샷이 이어지면 Seedance 2.5 `start_image`로, 앵글이 바뀌면 continuity
+Element(범위: 기하·위치·소품 상태만, 앵글 제외)로 넣는다. 프롬프트 첫 줄에
+"Frame opens matching the final frame of CUT N: <상태 요약>". 컷 N을 재렌더하면
+체인 아래 컷은 전부 stale → 재추출·재렌더.
 
 ## 8. 리비전 레시피 — 같은 씬 v1→v3에서 관찰된 실패→수정
 

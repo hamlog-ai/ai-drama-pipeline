@@ -325,6 +325,20 @@ The high-level arc:
    row (characters + environment + props/products) via `<<<id>>>`. Cross-check the
    prompt against the matrix row before submitting — a missing placeholder =
    guaranteed drift. Label the prompt `CUT N (0-15초)` and give per-second beats.
+   **Continuity chain (workflow §6a) — mandatory when a cut continues the previous
+   cut's location without a time jump** (a 30s/60s scene split into 15s renders,
+   the next beat in the same room). Elements lock *who/where*, not *the state
+   things were left in*, so: wait for cut N to render + pass visual QC, extract its
+   last frame with `scripts/last_frame.sh videos/cutN.mp4`, Read the jpg (sharp,
+   right sides, right prop state — else `LAST_OFFSET=0.5`), `media_upload` it, and
+   feed it to cut N+1 — as `start_image` (Seedance 2.5, same shot continues) or as
+   a `continuity` Element scoped "geometry, positions and prop state only, not
+   camera angle" (new angle, or Seedance 2.0). First prompt line: *"Frame opens
+   matching the final frame of CUT N: <state summary>"*; the chain's last cut says
+   *"This is the final clip of the scene — nothing follows it."* Record it in
+   `cuts[N+1].continuity_ref` (or `null` when deliberately unchained). Chained
+   cuts render sequentially; everything else stays parallel. Re-rendering cut N
+   invalidates every cut chained after it — re-extract and re-render them too.
    **Make each cut MULTI-SHOT, not one locked-off take — but let the AI direct it.**
    Don't hard-assign shots to fixed second ranges; instead ask for natural coverage
    that follows standard film grammar — e.g. *"edited as a multi-shot scene with
@@ -370,7 +384,10 @@ The high-level arc:
    **Blocking check:** for multi-cut same-location scenes, compare this cut's
    frames against the previous cut's — is each character still on the same side
    of the screen, facing the same way, per the scene's blocking lock? A left-right
-   swap between cuts is a QC fail even if every face is perfect.
+   swap between cuts is a QC fail even if every face is perfect. **Continuity
+   check** for chained cuts: put the first QC frame next to
+   `continuity/cut(N-1)_last.jpg` — same sides, camera height, prop state — and
+   record `cuts[N].qc.continuity`.
    (b) run ElevenLabs `speech_to_text` on the cut's audio — is the dialogue in
    the target language, are the scripted lines actually spoken, and is there any
    music bed that slipped past the no-BGM clause? Record pass/fail per check in
@@ -466,7 +483,8 @@ unified style string, every character/env/prop with its image job id, chosen
 variant, and `element_id`, every scene's blocking-lock sentence (`scenes`), the
 storyboard keyframes + the **`storyboard.approved` flag** (the video gate — a
 resumed session must not render while it's false), and every cut with its
-Seedance job id, local file, QC result, and status
+Seedance job id, local file, `continuity_ref` (the last-frame anchor it was
+chained from, or `null`), QC result, and status
 (`pending / rendered / qc_failed / final`).
 
 Why it matters:
@@ -488,6 +506,10 @@ Why it matters:
   clear of vertical-player UI.
 - `scripts/qc_frames.sh` — extracts N evenly-spaced frames per cut into
   `qc/<cut>/` for the step-6b visual QC (compare against character sheets).
+- `scripts/last_frame.sh` — extracts the true final frame of a cut into
+  `continuity/<cut>_last.jpg` (`LAST_OFFSET=0.5` steps back from a black/blurred
+  ending) — the anchor uploaded as `start_image` / continuity Element for the
+  next chained cut (workflow §6a).
 - `scripts/assemble.sh` — reference ffmpeg recipe for the audio mix (dialogue +
   SFX + optional narration) and subtitle overlay, then concat into the final video.
   Copy and adjust timings/inputs per project. **Keep BGM out of the per-cut mix**;
@@ -514,6 +536,12 @@ Why it matters:
   not position. Write the scene's **blocking lock** sentence (fixed screen sides +
   facing directions + 180-degree rule, see step 2) and paste it verbatim into every
   cut of that scene, then regenerate the cuts that violate it.
+- **Same location, same faces, but the scene "jumps" at every 15s seam** (camera
+  height changes, the cup switched hands, the door is suddenly closed) → the cuts
+  were rendered independently. Elements + blocking lock fix identity and sides,
+  not *state*. Chain them (workflow §6a): last frame of cut N → `last_frame.sh`
+  → upload → `start_image` / continuity Element on cut N+1, "Frame opens matching
+  the final frame of CUT N" as the first line, chained cuts rendered in order.
 - **Inconsistent / missing prop or product** (e.g. the bottle changes shape or
   vanishes between cuts) → you forgot to tag it. Create a `prop` Element from a
   clean product shot, then regenerate **every cut in that prop's matrix column**

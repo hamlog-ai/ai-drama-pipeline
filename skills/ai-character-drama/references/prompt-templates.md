@@ -165,8 +165,17 @@ acceptable there.
         "props": ["bottle"] },
       "video_job": "<seedance job id>", "file": "videos/cut1.mp4",
       "status": "pending | rendered | qc_failed | final",
-      "qc": { "visual": null, "blocking": null, "language": null,
-              "lines_spoken": null, "no_bgm": null, "stt": "qc/cut1_stt.json" } }
+      "continuity_ref": null,
+      "qc": { "visual": null, "blocking": null, "continuity": null, "language": null,
+              "lines_spoken": null, "no_bgm": null, "stt": "qc/cut1_stt.json" } },
+    { "n": 2, "matrix": { "characters": ["king"], "environment": "shore_joseon",
+        "props": ["bottle"] },
+      "video_job": null, "file": "videos/cut2.mp4", "status": "pending",
+      "continuity_ref": { "source_cut": 1, "frame": "continuity/cut1_last.jpg",
+        "offset": 0, "media_id": "<upload media id>", "media_type": "<type from upload>",
+        "role": "start_image | element | video_extension", "element_id": null },
+      "qc": { "visual": null, "blocking": null, "continuity": null, "language": null,
+              "lines_spoken": null, "no_bgm": null, "stt": "qc/cut2_stt.json" } }
   ],
   "assembly": { "full": null, "full_bgm": null, "bgm_track": null },
   "optional": { "virality_report": null, "dubs": [] }
@@ -177,7 +186,9 @@ Rules: an entity with a non-null `element_id` is NEVER re-registered; **no video
 job is ever submitted while `storyboard.approved` is not `true`** — on resume,
 if it's false/missing, re-present the board and wait for the OK; a cut only
 moves to `final` after all QC checks pass; on resume, work starts at the first
-`pending`/`qc_failed` entry.
+`pending`/`qc_failed` entry. A chained cut (`continuity_ref` non-null) is only
+submitted after its `source_cut` is `rendered` with `qc.visual` passed, and is
+flipped back to `pending` whenever that source cut is re-rendered (workflow §6a).
 
 ## QC checklist (run per cut at the §6b gate, record in project.json)
 
@@ -186,6 +197,7 @@ VISUAL (qc_frames.sh → Read frames vs. reference sheets)
 [ ] each character: same face, hair, outfit colour, shirt text as their sheet
 [ ] each prop/product: same shape, material, label as its reference shot
 [ ] environment matches its plate; unified style holding; correct aspect ratio
+[ ] chained cut: first frame matches continuity/cut(N-1)_last.jpg — sides, camera height, prop state
 [ ] blocking (same-location 2+ cut scenes): screen sides + facing match the
     previous cut and the scene's blocking lock — no left-right swap
 AUDIO (speech_to_text on the cut's audio)
