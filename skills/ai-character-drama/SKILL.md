@@ -117,9 +117,8 @@ later revision changes a prop or product, regenerate its Element and re-render
 - **Optional final passes:** Higgsfield `virality_predictor` (hook/retention
   report on the finished video) and ElevenLabs `dubbing` (multi-language
   versions of `FULL_bgm.mp4`).
-- **Background music (default final pass):** Suno — no MCP exists for it; the
-  user generates an instrumental on suno.com (prompt provided by this skill) and
-  saves it as `music/bgm.mp3`. One continuous instrumental matched to the full
+- **Background music (default final pass):** Suno MCP `suno_generate_music`
+  (instrumental) + `suno_get_task`. One continuous instrumental matched to the full
   runtime, laid over the **assembled** video and mixed UNDER dialogue+SFX at ~0.10
   — never per cut, never inside the Seedance renders (see Audio design).
 - **Assembly:** local `ffmpeg` + `python3`/Pillow for subtitles.
@@ -394,9 +393,8 @@ The high-level arc:
    speech (see Subtitles). **No BGM in this pass** — it goes on next, over the
    whole timeline at once (step 9), never per cut.
 9. **Background music — default final pass.** Once `FULL.mp4` is concatenated,
-   have the user generate **one continuous instrumental matched to the full
-   runtime** (~1 minute for a 4-cut video) on suno.com (Instrumental toggle ON;
-   hand them a ready-to-paste prompt and ask for the mp3 as `music/bgm.mp3`) — a
+   generate **one continuous instrumental matched to the full runtime** (~1 minute
+   for a 4-cut video) with Suno (`suno_generate_music`, `instrumental:true`) — a
    single track, NOT one per cut — and lay it across the **already-concatenated
    `FULL.mp4`**, re-mixed UNDER the existing dialogue+SFX at a low level (~0.10).
    Mixing over the full timeline (not per-cut) is what keeps the music seamless

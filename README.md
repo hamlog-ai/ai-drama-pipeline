@@ -50,10 +50,21 @@ https://github.com/hamlog-ai/ai-drama-pipeline
 
 > 목록이 안 뜨면 Claude 앱을 완전히 껐다가 다시 켜고 한 번 더 확인해 보세요.
 
+## 🆕 v2.5 — Seedance 2.5 규격으로 업그레이드
+
+힉스필드 스튜디오 실전(장편 123컷)과 Seedance 2.5 공식 프롬프팅 가이드로 검증한 규격을 반영했습니다.
+
+- **구조 모드 단일 규격** — 대사 유무와 무관하게 모든 컷을 대문자 헤더 구조(SCENE CONTEXT ~ POSITIVE LOCKS ~ NEGATIVE)로 씁니다. 콤팩트 규격은 폐지.
+- **2.5 확장 블록** — 월드 스타일 프리픽스, ★LOCK★(화자·주소·소품 카운트·축 잠금), EVENT TRACK(타임코드 이벤트), CHARACTER ACTING, 맨 마지막 NEGATIVE 블록.
+- **30초 멀티샷 정규화** — 30초 = 5샷 안팎 + 5비트, 샷 경계마다 HARD CUT 타임코드. 원테이크 30초는 트래버설/추격 컷 한정.
+- **분량 기준 갱신** — 15초 표준 컷 400~600단어, 플랫폼 입력 한도 약 18,000자까지 확장 기법 온전 적용. 납품 전 `wc -m` 실측.
+- **전 컷 공통 클로즈** — no-BGM 클로즈 + 캡션 클로즈("no captions, no subtitles, no on-screen text")를 대사 유무와 무관하게 필수화.
+- **BGM 최종 패스** — 영상 조립이 끝난 뒤 Suno로 전체 러닝타임 길이의 인스트루멘털 한 곡을 낮게(≈0.10) 깔아 마무리. 컷별 BGM 베이킹 금지.
+
 ## ✨ 무엇을 할 수 있나요?
 
 - "이런 스토리야, 3부작 숏드라마 대본 써줘" → **한국어 각본**이 트리트먼트부터 Word 파일까지 단계별로 완성됩니다.
-- "S#3 영상 프롬프트 줘" → 씬이 **Seedance 2.0용 15초 컷 프롬프트**(3비트 구조, 대사 음절 예산, 캐릭터 Element 태그)로 변환됩니다.
+- "S#3 영상 프롬프트 줘" → 씬이 **Seedance 2.5용 15·30초 컷 프롬프트**(3비트 구조, 대사 음절 예산, 캐릭터 Element 태그)로 변환됩니다.
 - "이 대본으로 1분짜리 숏드라마 만들어줘" → 캐릭터 시트 생성부터 컷 렌더, 자막·SFX·나레이션, 최종 조립, BGM까지 **영상 제작 전체**를 총괄합니다.
 - "캐스팅 보드 만들어줘 / QC 뽑아줘 / 컷 합쳐줘" → 후보 비교 보드, 프레임 QC, concat 조립 같은 **반복 작업이 스크립트로 자동화**됩니다.
 
@@ -101,7 +112,7 @@ git이 없다면 [Releases](https://github.com/hamlog-ai/ai-drama-pipeline/relea
 screenplay-pipeline    각본 집필 (트리트먼트 → 씬별 대본 → IP 체크 → Word 변환)
    │
    ▼
-seedance-cut-prompt    씬(S#N) → Seedance 2.0 컷 프롬프트 변환
+seedance-cut-prompt    씬(S#N) → Seedance 2.5 컷 프롬프트 변환
    │                   (15초 3비트, 음절 예산, Element 태그, 블로킹 락)
    ▼
 ai-character-drama     영상 제작 총괄 (캐릭터 시트 → Element → 컷 렌더
@@ -116,7 +127,7 @@ drama-ops              반복 운영 (후보 비교 보드 · QC 프레임 추�
 | 스킬 | 역할 | 이렇게 말하면 실행돼요 |
 |---|---|---|
 | `screenplay-pipeline` | 스토리 피치를 받아 한국어 각본을 단계별로 완성 (밈 패러디 삽입, IP 체크리스트, Word 변환 포함) | "이런 스토리야 — 대본 써줘" |
-| `seedance-cut-prompt` | 각본 씬을 Seedance 2.0용 15초 컷 프롬프트로 변환, 정책위반 시 리라이트 | "S#3 영상 프롬프트 줘" |
+| `seedance-cut-prompt` | 각본 씬을 Seedance 2.5용 15·30초 컷 프롬프트로 변환 (★LOCK★·EVENT TRACK·NEGATIVE 블록), 정책위반 시 리라이트 | "S#3 영상 프롬프트 줘" |
 | `ai-character-drama` | 캐릭터 일관성(3이미지 시트 + Element) 기반으로 영상 제작 전 과정 총괄 | "1분짜리 숏드라마 만들어줘" |
 | `drama-ops` | 보드/QC/조립 파이썬 스크립트 3종 — HTML 보드를 손으로 짜지 않게 해줌 | "캐스팅 보드 만들어줘" |
 
@@ -128,7 +139,7 @@ drama-ops              반복 운영 (후보 비교 보드 · QC 프레임 추�
 
 | 용도 | 필요한 것 | 필수 여부 |
 |---|---|---|
-| 영상 생성 | Seedance 2.0 지원 생성 MCP 서버 (Element/참조 이미지 등록 가능해야 함) | 영상 제작 시 필수 |
+| 영상 생성 | Seedance 2.5(또는 2.0) 지원 생성 MCP 서버 (Element/참조 이미지 등록 가능해야 함) | 영상 제작 시 필수 |
 | 조립/QC | `ffmpeg` (`brew install ffmpeg`) | 조립 단계 필수 |
 | Word 변환 | Node.js | 각본 .docx 출력 시 |
 | 나레이션/SFX | ElevenLabs MCP | 선택 |

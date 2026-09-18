@@ -3,8 +3,7 @@
 This is the copy-pasteable companion to SKILL.md. Tool names are
 `mcp__<server-uuid>__<tool>`; discover via ToolSearch (`generate_image` for
 `gpt_image_2`, `seedance`, `reference_elements`, `text_to_sound_effects`,
-`text_to_speech`). The final BGM pass uses no MCP — the user generates the
-track on suno.com (§9).
+`text_to_speech`, and `suno_generate_music` for the final BGM pass).
 
 **Prompt quality gate: before writing any prompt in any step below, read
 `prompt-mastery.md` and pass its self-review rubric (§6). It holds the craft rules
@@ -380,18 +379,18 @@ intro line (for the silent opening of cut 1) and maybe an outro; skip mid-cut VO
 5. *(§9, default)* Run the BGM pass: lay the Suno track at ~0.10 under everything
    and export `FULL_bgm.mp4` — the headline deliverable.
 
-## 9. Background music — default final pass — Suno (web, no MCP)
+## 9. Background music — default final pass — `suno_generate_music`
 
 BGM ships by default, but **never per cut** — one continuous track over the
-*whole* video is the only way it stays seamless across concat boundaries. There is
-no Suno MCP: after `FULL.mp4` is concatenated (§8), hand the user a ready-to-paste
-prompt and ask them to generate it on suno.com with the **Instrumental toggle ON**:
+*whole* video is the only way it stays seamless across concat boundaries. Run this
+*after* `FULL.mp4` is concatenated (§8):
 ```
-<mood> instrumental for a <genre> ... no vocals, loopable, modern
+prompt:"<mood> instrumental for a <genre> ... no vocals, loopable, modern",
+instrumental:true, model:"chirp-v5-5"
 ```
 Aim for a **single track matched to the full runtime** (~1 minute for a 4-cut
-video). Suno returns 2 takes of differing length — have the user pick the one
-closest to the total runtime and save the mp3 as `music/bgm.mp3`, then lay it across
+video). Poll `suno_get_task`; it returns 2 takes of differing length — pick the one
+closest to your total runtime. Download the mp3 to `music/`, then lay it across
 the **already-concatenated `FULL.mp4`** (not the individual cuts), re-mixed UNDER
 the existing dialogue+SFX at ~0.10, and export `FULL_bgm.mp4` — the headline
 deliverable (keep the SFX-only `FULL.mp4` intact as a fallback).

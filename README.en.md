@@ -8,10 +8,21 @@ A set of four Claude Code skills covering the entire pipeline:
 
 🇰🇷 [한국어 README](README.md)
 
+## 🆕 v2.5 — Upgraded to the Seedance 2.5 spec
+
+Validated against a 123-cut feature production in Higgsfield Studio and the official Seedance 2.5 prompting guide.
+
+- **Single structured format** — every cut, with or without dialogue, uses the uppercase-header structure (SCENE CONTEXT … POSITIVE LOCKS … NEGATIVE). The compact format is retired.
+- **2.5 extension blocks** — world-style prefix, ★LOCK★ (speaker/address, prop counts, axis), EVENT TRACK (timecoded events), CHARACTER ACTING, and a trailing NEGATIVE block.
+- **30-second multi-shot as a standard pattern** — about 5 shots + 5 beats, HARD CUT timecodes at every shot boundary. One-take 30s only for traversal/chase cuts.
+- **Updated length budget** — 400–600 words for a standard 15s cut, up to ~18,000 characters of platform input; measure with `wc -m` before delivery.
+- **Mandatory closes on every cut** — the no-BGM close plus a caption close ("no captions, no subtitles, no on-screen text").
+- **Background music as the final pass** — after assembly, one continuous Suno instrumental mixed low (≈0.10) over the whole runtime; never baked per cut.
+
 ## ✨ What can it do?
 
 - "Here's my story — write me a 3-part short drama script" → A **complete screenplay** is built step by step, from treatment to a Word file.
-- "Give me the video prompt for S#3" → The scene is converted into a **15-second cut prompt for Seedance 2.0** (3-beat structure, dialogue syllable budget, character Element tags).
+- "Give me the video prompt for S#3" → The scene is converted into a **15/30-second cut prompt for Seedance 2.5** (3-beat structure, dialogue syllable budget, character Element tags).
 - "Turn this script into a 1-minute short drama" → It **directs the entire production**: character sheets, cut renders, subtitles/SFX/narration, final assembly, and BGM.
 - "Make a casting board / run QC / concat the cuts" → **Repetitive production chores are automated** with scripts: candidate comparison boards, frame-level QC, concat assembly.
 
@@ -59,7 +70,7 @@ Story idea
 screenplay-pipeline    Screenwriting (treatment → scene-by-scene script
    │                   → IP check → Word export)
    ▼
-seedance-cut-prompt    Scene (S#N) → Seedance 2.0 cut prompt
+seedance-cut-prompt    Scene (S#N) → Seedance 2.5 cut prompt
    │                   (15s / 3 beats, syllable budget, Element tags,
    │                   blocking lock)
    ▼
@@ -77,7 +88,7 @@ drama-ops              Ops automation (candidate comparison boards
 | Skill | Role | Say this to trigger it |
 |---|---|---|
 | `screenplay-pipeline` | Turns a story pitch into a complete screenplay, step by step (meme-parody inserts, IP checklist, Word export included) | "Here's my story — write the script" |
-| `seedance-cut-prompt` | Converts screenplay scenes into 15-second Seedance 2.0 cut prompts; rewrites on policy-violation rejections | "Give me the video prompt for S#3" |
+| `seedance-cut-prompt` | Converts screenplay scenes into 15/30-second Seedance 2.5 cut prompts (★LOCK★, EVENT TRACK, NEGATIVE block); rewrites on policy-violation rejections | "Give me the video prompt for S#3" |
 | `ai-character-drama` | Directs the entire production with character consistency (3-view sheets + Elements) | "Make me a 1-minute short drama" |
 | `drama-ops` | Three Python scripts for boards/QC/assembly — so you never hand-write an HTML board again | "Make a casting board" |
 
@@ -89,7 +100,7 @@ The plugin installs all four at once, so you don't have to think about it.
 
 | Purpose | What you need | Required? |
 |---|---|---|
-| Video generation | A generation MCP server supporting Seedance 2.0 (must support Element / reference-image registration) | Required for production |
+| Video generation | A generation MCP server supporting Seedance 2.5 (or 2.0) (must support Element / reference-image registration) | Required for production |
 | Assembly / QC | `ffmpeg` (`brew install ffmpeg`) | Required for assembly |
 | Word export | Node.js | For .docx script output |
 | Narration / SFX | ElevenLabs MCP | Optional |
@@ -119,7 +130,7 @@ Screenwriting and cut-prompt conversion work with Claude Code alone — none of 
 **Q. I don't have a video-generation MCP. Can I still use this?**
 A. Yes. Screenwriting (`screenplay-pipeline`) and cut-prompt conversion
 (`seedance-cut-prompt`) produce text, so they work out of the box. Paste the
-prompts into any platform that supports Seedance 2.0.
+prompts into any platform that supports Seedance 2.5 (or 2.0).
 
 **Q. My cut prompt got rejected as a "policy violation."**
 A. Paste the rejected prompt back and say "it got a policy violation" —

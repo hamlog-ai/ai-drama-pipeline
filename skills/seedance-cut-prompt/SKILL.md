@@ -1,49 +1,22 @@
 ---
 name: seedance-cut-prompt
-description: 각본/대본의 특정 씬(S#N)을 Seedance 2.0용 영상 컷 프롬프트로 변환한다 — 15초 3비트 구조, 대사 음절 예산, Element 태그 참조, 멀티샷 위임, no-BGM 클로즈, IP 세이프 네이밍까지 규격대로. 사용자가 "S#N 영상 프롬프트 줘", "이 씬 시댄스/Seedance용으로", "영상 프롬프트로 바꿔줘", "15초 컷으로 만들어줘"라고 하거나, 생성한 프롬프트가 "정책위반/policy violation/protected content"로 거부됐다고 할 때 반드시 사용한다. 프롬프트 텍스트만 원하는 경우에 쓰고, 실제 영상 생성·조립까지 원하면 ai-character-drama 스킬로 넘어간다.
+description: 각본/대본의 특정 씬(S#N)을 Seedance 2.0/2.5용 영상 컷 프롬프트로 변환한다 — 대문자 헤더 구조 모드 단일 규격(SCENE CONTEXT~POSITIVE LOCKS), 15초 3비트·대사 음절 예산·DIALOGUE 블록, Element 태그 참조, no-BGM 클로즈, IP 세이프 네이밍, 2.5 확장 규격(월드 스타일 프리픽스·★LOCK★·EVENT TRACK)까지 규격대로. 사용자가 "S#N 영상 프롬프트 줘", "이 씬 시댄스/Seedance용으로", "영상 프롬프트로 바꿔줘", "15초 컷으로 만들어줘"라고 하거나, 생성한 프롬프트가 "정책위반/policy violation/protected content"로 거부됐다고 할 때 반드시 사용한다. 프롬프트 텍스트만 원하는 경우에 쓰고, 실제 영상 생성·조립까지 원하면 ai-character-drama 스킬로 넘어간다.
 ---
 
 # Seedance Cut Prompt (대본 씬 → 영상 프롬프트 변환)
 
-각본의 씬 하나를 Seedance 2.0 컷 프롬프트로 변환한다. 산출물은 **프롬프트 텍스트 + 호출 파라미터 + 사전 준비물(Element별 완성 이미지 프롬프트 포함)** 3종 세트. 실제 렌더/전체 영상 제작은 `ai-character-drama` 스킬의 영역이다 — 그쪽으로 넘어갈 땐 이 스킬로 만든 프롬프트를 그대로 들고 간다.
+각본의 씬 하나를 Seedance 컷 프롬프트로 변환한다. 산출물은 **프롬프트 텍스트 + 호출 파라미터 + 사전 준비물(Element별 완성 이미지 프롬프트 포함)** 3종 세트. 실제 렌더/전체 영상 제작은 `ai-character-drama` 스킬의 영역이다 — 그쪽으로 넘어갈 땐 이 스킬로 만든 프롬프트를 그대로 들고 간다.
 
-**모드 선택이 첫 판단이다.** 대화가 중심인 컷(대사 2줄 이상 또는 화자 2명) → 아래 콤팩트 규격 (음절 예산이 지배 제약). 무대사(SFX only) **또는 대사 ≤1줄의 짧은 한마디뿐**이면서 ①이전 컷과 프레임 연속이거나 ②공간 트릭(변신·통과·아이리스)이 있거나 ③비인간 주연이거나 ④액션·VFX·연속성이 지배하는 컷 → **구조 모드** (아래 별도 섹션).
-
-> **대사 컷의 예외 — 특정 샷이 지정된 컷은 대사가 있어도 구조 모드 (2026-08 실측).**
-> 대본이 특정 샷을 요구하면(우물 수면 리플렉션, 손목 인서트, 톱다운, 그 밖의 특수
-> 앵글) 콤팩트의 멀티샷 위임으로는 **그 샷이 안 나온다** — 모델이 평범한 투샷·
-> 클로즈업으로 대체해버린다. 같은 대본·같은 Element로 A/B를 떠보니, 콤팩트는
-> "우물에 비친 얼굴"을 두 사람 서 있는 그림으로 뭉갰고 구조 모드는
-> `20° tight insert, 0.6m above the well mouth angled down`으로 정확히 뽑았다.
-> 판정: **컷의 승부처가 "입"이어도, 대본에 그려진 특정 이미지가 그 컷의 핵심이면
-> 구조 모드.** 대사는 구조 모드의 ACTION TIMING 안에 voice verbatim으로 격리한다. 짧은 한 줄 대사는 구조 모드의 AUDIO 섹션에 verbatim으로 격리한다 (보이스 descriptor + "His line, and nothing else" 하드 블록 — Hell Grind 방식). 1인칭(POV) 컷이나 격투/추격 컷이면 해당 모드 위에 **특수 컷 레시피**(아래 섹션)를 겹쳐 적용한다.
+**규격은 구조 모드 하나다 (2026-08 개정 — 콤팩트 규격 폐지).** 대사 유무와 무관하게 모든 컷을 구조 모드(아래)로 쓴다. 폐지 근거 두 가지: ①힉스필드 스튜디오 실전(Cully Hill Boys 123컷)이 대사 컷 포함 전 컷을 이 구조로 감 — 멀티샷 위임 없이 샷을 직접 설계. ②자체 A/B 실측 — 대본이 특정 샷(우물 수면 리플렉션, 손목 인서트, 톱다운 등)을 요구할 때 콤팩트의 멀티샷 위임은 그 샷을 평범한 투샷·클로즈업으로 뭉갰고, 구조 모드는 `20° tight insert, 0.6m above the well mouth angled down`으로 정확히 뽑았다. 대사 컷은 구조 모드에 **DIALOGUE 블록**을 더하고(아래 대사 규칙), 1인칭(POV) 컷·격투/추격 컷은 **특수 컷 레시피**(아래 섹션)를 겹쳐 적용한다.
 
 **납품 전 필수: 셀프리뷰 루브릭 통과.** 이 스킬의 예산·블로킹 수치는
 `ai-character-drama/references/prompt-mastery.md`의 요약본이다 — 프롬프트를
 사용자에게 주기 전에 그 문서의 셀프리뷰 루브릭(§6)을 실제로 순회하고, 걸리는
 항목은 고친 뒤에 납품한다. 두 문서의 수치가 어긋나면 prompt-mastery.md가 원본이다.
 
-## 프롬프트 해부도 — 콤팩트 규격 (대사 컷 기본)
+## 대사 규칙 (전 컷 공통 — 구 콤팩트 규격에서 승계)
 
-```
-CUT S#N (0-15s).                              ← 라벨
-EXACT N CHARACTERS — NO DUPLICATES: [이름들].   ← 캐릭터 수 헤더 (2인 이상 컷 권장 — 모델은 사람을 추가하고 가구를 복제한다)
-<통일 스타일 문자열>, <톤 키워드>               ← 스타일은 한 글자도 안 바뀌게; 톤은 genre 파라미터와 호응 (cinematic drama / fast comedy 등)
-Location: <<<env_id>>> — 공간+조명+세트 묘사.   ← 환경 Element
-<<<char_id>>> (한 줄 외형 요약) + 블로킹.        ← 캐릭터 Element + 누가 어디서 뭘 들고
-<블로킹 락 문장 또는 GEO SPATIAL LAYOUT>         ← 같은 장소 2컷+ 씬이면 필수 (아래 참조)
-0-5s: [비트 1 — 구체적 동사 액션 + 대사]         ← 씬 첫 컷이면 0-1s는 배치 고정 와이드 (아래 "첫 1초 규칙")
-5-10s: [비트 2]
-10-15s: [비트 3 — 리액션/표정으로 끝 (버튼)]
-[선택] ROCO — state: X; wants: Y; hides: Z;     ← 압축 연기 블록 (감정 비중 큰 컷 —
-rhythm: W; changes when: V.                       acting-system.md §10 축약형)
-등장인물은 한국어로 말한다.                       ← 언어 클로즈 (필수)
-Edited as a multi-shot scene with motivated hard cuts between varied angles
-(establishing, two-shot, close-ups, reaction, insert) chosen naturally to fit
-the beats; dynamic cinematic coverage.          ← 멀티샷 위임 (필수)
-no background music, no BGM, no soundtrack — only spoken dialogue and natural
-diegetic sound (<장면에 맞는 환경음 예시>).       ← no-BGM 클로즈 (필수, 마지막 줄)
-```
+콤팩트 규격은 폐지됐지만, 그 안에서 실측 검증된 대사 도구는 전부 승계한다. 구조 모드 안에서의 배치: **대사 전문 → DIALOGUE 블록** (화자별 전달 톤 + 따옴표 원문), **발화 타이밍 → ACTION TIMING** (대사 원문은 넣지 않고 "he delivers line 1" 식 참조만), **보이스 descriptor·환경음·no-BGM → AUDIO**, **화자 락·입 다묾 → POSITIVE LOCKS**. 모든 대사 컷의 AUDIO에 언어 클로즈("등장인물은 한국어로 말한다")와 no-BGM 클로즈("no background music, no BGM, no music track, no soundtrack — only spoken dialogue and natural diegetic sound (<장면에 맞는 환경음 예시>)")와 캡션 클로즈("no captions, no subtitles, no on-screen text")를 반드시 넣는다. **이 두 클로즈는 대사 유무와 무관하게 모든 컷 공통 필수다 (2026-08-30 사용자 지시).**
 
 **첫 1초 규칙 (씬의 첫 컷 + 이음새 컷).** 씬 첫 컷의 0~1초는 대사·액션 없는
 **배치 고정 와이드**: 모델이 누가 어디 서고 빛이 어디서 오는지 "촬영"해 이후
@@ -75,8 +48,7 @@ and low." His line, and nothing else: "..."`). 하드 블록 동반: 모두가 �
 ## 예산 (넘기면 품질이 무너진다)
 
 - **15초 = 3비트, 비트당 물리적 액션 1개** + (선택) 대사 1줄. 밀도가 아쉬우면 액션 대신 리액션 샷.
-- **대사: 컷당 ≤3줄, 줄당 ≤15음절, 화자 ≤2명, 구어체.** 한국어 발화 속도 초당 5~6음절 기준 — 초과하면 립싱크 붕괴.
-- **전체 120~250단어.** 250 초과 시 가치 낮은 절부터 삭제.
+- **대사: 컷당 ≤3줄, 줄당 ≤15음절, 화자 ≤2명, 구어체.** 한국어 발화 속도 초당 5~6음절 기준 — 초과하면 립싱크 붕괴. (DIALOGUE 블록에도 그대로 적용.)
 - 감정은 컷당 하나. 대사엔 연기 부사("flat and deadpan", "whispers")를 붙인다.
 - 추상어 금지: "감동적으로/멋지게" → 몸으로 번역 ("her smile switches off like a light").
   감정 단어("sad/angry") 대신 **근육으로**: 악물렸다 풀리는 턱, 단계적 깜빡임("one lazy
@@ -88,7 +60,7 @@ and low." His line, and nothing else: "..."`). 하드 블록 동반: 모두가 �
 - **금칙어 사전**: 거부당한 단어는 프로젝트 로그에 축적해 치환한다 — "dark"→"low
   key", "jolting"→"rapid motion".
 - 초 타이밍은 리듬 가이드일 뿐 — Seedance는 정확한 초를 못 지킨다. 순서와 비중만 전달된다.
-- 특정 비트에 샷 스펙이 꼭 필요하면 그 비트에만 축약 표기를 붙인다 — `(29° FOV, ~1.5m, eye level)`. 전 비트에 샷을 지정하면 뚝뚝 끊긴다 (멀티샷 위임이 기본).
+- 샷 스펙(화각·거리·높이)은 OPTICS/CAMERA 섹션이 담당한다 — ACTION TIMING 비트 안에 스펙을 중복 기재하지 않는다.
 
 ## Element 규칙
 
@@ -114,6 +86,8 @@ and low." His line, and nothing else: "..."`). 하드 블록 동반: 모두가 �
 - `continuity reference` — 직전 컷의 마지막 프레임. 시작 포즈·카메라 높이·소품 상태를 잇는 접착제 (구조 모드 참조). 등록 방법: 로컬 프레임은 image_job이 없으므로 `media_upload`/`media_import_url`로 올린 뒤 반환된 media id/type으로 등록 — 절차는 `ai-character-drama/references/workflow.md` §4.
 
 참조 사진과 씬의 현재 상태가 다르면 차이를 명시한다: "the room is tidier than the reference photo, no clutter."
+스케일은 미터보다 **인물 대비**가 강할 때가 있다: "a longbow taller than she is" — 절대 치수 대신 상대 비교로 잠그면 드리프트가 준다.
+**배경 인구도 앵커하라**: 엑스트라의 인종·민족을 명시하지 않으면 서구 얼굴이 디폴트로 나온다 — "지나가는 행인들의 얼굴은 한국인이다" 한 줄이면 잠긴다 (사란 파쿠르 런 실측).
 
 **변형은 별도 Element로 잠근다.** 의상·상태가 바뀌는 캐릭터는 시트를 변형마다 따로 만들어 각각 등록한다 (`<<<ella>>>` 평상복 / `<<<ella_ballgown>>>` 드레스 / `<<<ella_soaked>>>` 비 맞은 상태). 한 시트로 "드레스 입혀줘"를 텍스트로 시키면 드리프트가 난다 — 컷 프롬프트에서는 그 컷의 상태에 맞는 변형 Element만 참조한다. 컷 안에서 의상/상태 변화가 불가능한 것과 같은 원리다.
 
@@ -139,7 +113,7 @@ Element는 얼굴을 고정하지 위치를 고정하지 않는다. 같은 장�
 2. 바라보는 방향 — "facing right / facing each other"
 3. 축 유지 선언 — "all shots stay on the same side of the action axis (180-degree rule); they never swap screen sides between shots or cuts."
 
-예: *"<<<king>>> sits screen-LEFT facing right; <<<minister>>> stands screen-RIGHT facing left; all shots stay on the same side of the action axis (180-degree rule); they never swap screen sides."* 멀티샷 위임과 충돌하지 않는다 — 앵글은 모델이 고르되 축과 좌우는 이 문장이 못박는다. 여러 컷을 연속으로 뽑을 때 "사전 준비물"에 씬별 블로킹 락 문장도 함께 명시해 사용자가 컷마다 복붙하게 한다.
+예: *"<<<king>>> sits screen-LEFT facing right; <<<minister>>> stands screen-RIGHT facing left; all shots stay on the same side of the action axis (180-degree rule); they never swap screen sides."* 샷 설계와 충돌하지 않는다 — 앵글은 OPTICS/CAMERA가 정하되 축과 좌우는 이 문장이 못박는다. 여러 컷을 연속으로 뽑을 때 "사전 준비물"에 씬별 블로킹 락 문장도 함께 명시해 사용자가 컷마다 복붙하게 한다.
 
 **자리 고정 4중 락 (CINEDANCE 이식 — 블로킹 락만으로 자리가 흔들리면 겹친다).**
 화면 좌우(screen-LEFT/RIGHT)는 카메라에 상대적이라, 모델이 앵글을 바꾸는 순간
@@ -157,7 +131,7 @@ Element는 얼굴을 고정하지 위치를 고정하지 않는다. 같은 장�
    required characters in their correct positions. No empty establishing
    frame, no delayed character reveal." 배치 고정 와이드(첫 1초 규칙)와 세트로
    쓰면 첫 샷에서 자리가 확정된다.
-4. **노 텔레포트 연속성 락** — 멀티샷 위임 문장 뒤에 덧붙인다: "Across every
+4. **노 텔레포트 연속성 락** — POSITIVE LOCKS에 덧붙인다: "Across every
    internal cut: same left/right relationship, same gaze targets, same
    distance to landmarks — characters never teleport or swap positions."
 
@@ -184,9 +158,9 @@ GEO SPATIAL LAYOUT (locked across every shot — pure spatial map):
 공간이 좁을수록 모델의 선택지가 준다. GEO는 지도일 뿐 — 룩은 로케이션 Element가
 담당.
 
-## 구조 모드 (무대사 시네마틱 컷 전용)
+## 구조 모드 (기본 규격 — 모든 컷)
 
-Higgsfield Cinema Studio 스타일의 섹션 구조 프롬프트. 무대사 + 연속성 크리티컬 컷에서 콤팩트 규격보다 구도·공간·물리가 확연히 좋게 나온다. 전체 분석과 예문은 `ai-character-drama/references/higgsfield-structure.md` 참조. 섹션 골격 (이 순서, 대문자 헤더 그대로):
+Higgsfield 스튜디오 실전 표준의 섹션 구조 프롬프트 — Cully Hill Boys 123컷 실측에서 대사 컷 포함 전 컷이 이 구조였다. 전체 분석과 예문은 `ai-character-drama/references/higgsfield-structure.md` 참조. 섹션 골격 (이 순서, 대문자 헤더 그대로):
 
 ```
 SCENE CONTEXT      ← "EXACT N CHARACTERS — NO DUPLICATES" 헤더 + 요약 + 시퀀스
@@ -195,7 +169,9 @@ ACTIVE REFERENCES  ← Element마다 역할+범위 선언 (위 Element 규칙)
 LOCATION MAP       ← 공간 지리. 프레임 밖 연속성까지 ("the room continues toward...")
                      지리 복잡하면 GEO SPATIAL LAYOUT 블록으로 (위 참조)
 FIRST FRAME AND SPATIAL BLOCKING ← 첫 프레임 상태. 항상 이미 행동 중간(mid-action)
-FORMAT MODE        ← 비율/4K/카메라 유형/샷 수/"SFX only, no dialogue, no subtitles"
+FORMAT MODE        ← 비율/4K/카메라 유형/샷 수/무대사 컷은 "SFX only, no dialogue,
+                     no captions" — 대사 컷은 "dialogue per DIALOGUE block, no
+                     captions, no subtitles"
 OPTICS             ← 샷별: 화각° + 거리m + 높이 + 실행 가능 근거 (아래)
 CAMERA             ← 샷별 카메라 무브먼트 + 타임코드 (피사체 액션과 분리 서술)
 ACTION TIMING      ← 비트 타임라인. 샷 경계마다 "N.Ns HARD CUT." 한 줄.
@@ -203,16 +179,43 @@ ACTION TIMING      ← 비트 타임라인. 샷 경계마다 "N.Ns HARD CUT." �
 PHYSICS            ← 역학 계약 2~4문장 (아래)
 LIGHTING           ← 광원마다 동기 명시 + 아티팩트 가드. 역광이면 콩트르주르
                      표준 블록 (hellgrind-playbook.md §4.7)
-AUDIO              ← 앰비언스/폴리 + "No dialogue, no music, no captions"
+AUDIO              ← 앰비언스/폴리 + no-BGM 클로즈("... no music track ...") +
+                     캡션 클로즈("no captions, no subtitles, no on-screen text" —
+                     전 컷 필수). 무대사 컷은 "No dialogue, no music track, no
+                     captions"; 대사 컷은 보이스 descriptor(verbatim) + 언어 클로즈
+DIALOGUE           ← 대사 컷만: 화자별 (전달 톤 부사) + 따옴표 대사 전문.
+                     음절 예산 적용 (컷당 ≤3줄, 줄당 ≤15음절, 화자 ≤2명)
 CHARACTER ACTING   ← 캐릭터별 1~2줄: state / wants / hides / body rhythm /
                      what changes (감정 비중 있는 컷 — acting-system.md §10)
 POSITIVE LOCKS     ← 최종 락 블록 (아래) — 통일 스타일 문자열은 여기 맨 끝
+NEGATIVE           ← 맨 마지막: 금지 태그 나열 (아래 NEGATIVE 규칙)
 ```
 
-- **분량 400~600단어, 그리고 플랫폼 입력 한도 ~5,000자(한글 포함 문자 수) 필수 준수** — 납품 전 `wc -m`으로 실측하라 (어림 금지; 30초 컷은 쉽게 6,000자를 넘긴다). 초과 시 감량 순서: 수사적 문장 → OPTICS/CAMERA 섹션 통합 → 중복 선언 → PHYSICS/LIGHTING 부연. **절대 보존**: EXACT N 헤더, 소품·발사 카운트 락, 축·랜드마크 위치 락, HARD CUT 타임코드, AUDIO의 verbatim 대사 블록. (대사 컷의 120~250단어 예산은 이 모드에 적용 안 됨 — 대사가 없거나 한 줄뿐이라 희석될 립싱크 지시도 적다.) 대화 중심 컷(대사 2줄+ 또는 화자 2명)은 이 모드를 쓰지 마라 — 콤팩트 규격으로. **대사 ≤1줄은 허용**: AUDIO 섹션에만, 보이스 descriptor(verbatim) + "His line, and nothing else" 하드 블록과 함께. 액션 섹션에는 대사의 한 단어도 넣지 않는다.
+**NEGATIVE 블록 (2026-08-30 추가 — 사란 컷 실측, 프롬프트 바이블 §15).** 프롬프트 맨
+마지막에 순수 금지 태그를 나열하는 블록. "긍정형 액션만" 원칙과 충돌하지 않는다 — 그
+원칙이 금지하는 것은 **액션 문장 속 부정**("does NOT fall"류, 오해석 위험)이고, 말미의
+짧은 명사구 금지 태그("no tears, no BGM")는 별개 도구다. 작성 규칙:
+- **주제별 클러스터로 묶는다** (줄바꿈으로 구분): 정체성 드리프트(머리·의상·소품) /
+  액션 / 감정·신파 / 연기 톤 / 텍스트·자막 / 카메라 / 신체 결함·기타. 순서는 이 컷의
+  사고 위험이 큰 클러스터부터.
+- **사고 이력의 축적 문서다** — 드리프트를 겪을 때마다 한 줄씩 늘린다(금칙어 사전과
+  같은 원리). 표준 상비 태그: no beauty filter, no extra fingers, no morphing faces,
+  no identity drift in <머리/장비>, no slow motion, no optical zoom, no drone shot,
+  no gimbal-smooth glide, no subtitles, no on-screen text, no BGM, no music track.
+- **포지티브와 싸우게 하지 마라** — 전역 금지(no running 등)를 걸었으면 어떤 샷
+  지시에도 그 동작이 없어야 한다. 충돌하면 화면이 어정쩡해진다.
+- 승부처 금지는 NEGATIVE에만 두지 말고 3중 재진술(SCENE CONTEXT 선행 금지 →
+  ★LOCK★ → NEGATIVE)로 조인다.
+
+- **분량: 15초 표준 컷은 400~600단어, 플랫폼 입력 한도는 ~18,000자(한글 포함 문자 수)** — 힉스필드 입력창 1.8만자까지 수용 (사용자 실측 2026-08-30; 구 만자 한도(2026-08-22)와 5,000자 캡 주장은 폐기). 납품 전 `wc -m`으로 실측하라 (어림 금지). 1.8만자 예산에서는 2.5 확장 기법(3중 재진술·EVENT TRACK·CHARACTER ACTING·확장 락)을 온전히 적용할 수 있다 — 단 분량은 통제 수단이지 목표가 아니다: 컷의 통제에 기여하지 않는 수사는 한도가 허용돼도 넣지 않는다. 초과 시 감량 순서: 수사적 문장 → OPTICS/CAMERA 섹션 통합 → 중복 선언 → PHYSICS/LIGHTING 부연. **절대 보존**: EXACT N 헤더, 소품·발사 카운트 락, 축·랜드마크 위치 락, HARD CUT 타임코드, DIALOGUE 블록·AUDIO의 verbatim 대사. **대사 컷 처리**: 대사 2줄+ 또는 화자 2명이면 DIALOGUE 블록에 전문을 쓰고(음절 예산 적용) 화자 락·주소 락(★SPEAKER/ADDRESS LOCK★)을 POSITIVE LOCKS에 세운다. **대사 ≤1줄이면** DIALOGUE 블록 생략하고 AUDIO 섹션에 격리해도 된다: 보이스 descriptor(verbatim) + "His line, and nothing else" 하드 블록 (Hell Grind 방식). 어느 쪽이든 액션 섹션(ACTION TIMING)에는 대사의 한 단어도 넣지 않는다 — "he delivers line 1" 식 참조만.
 - **OPTICS 3단 사다리**: `47°`(표준 50mm 상당 — 설정/트래킹) / `29°`(준망원 85mm — 인물/압축) / `20°`(타이트 135mm — 클로즈업). 특수 용도 확장: `8°`(초망원 스포츠 중계 압축, heat shimmer와 조합) / `12°`(매크로 소품 디테일) / `63°`(와이드) / `84°`(웜즈아이 울트라와이드, 지면 카메라) / `107°`(무릎 높이 달리 와이드). 각 샷에 `화각 + camera N meters + 높이 + "room-feasible framing"` 근거를 붙인다 — 근거가 있으면 물리적으로 불가능한 앵글·급작스런 광각 왜곡이 사라진다. 앵글엔 의도도 붙인다 ("oblique angle deliberately avoiding a frontal read"). **렌즈는 콘텐츠 유형으로 고른다** — 망원 샷엔 가시적 결과 4개+("background compressed flat", "creamy bokeh wash", "close framing achieved through lens reach, not physical proximity"), 와이드 샷엔 3개+("foreground looms larger", "deep edge-to-edge focus", "straight lines stay rectilinear"), 8° 초망원엔 전경 가림 필수; 한 비트에 콘텐츠 클래스(인물/환경/매크로)를 섞으면 렌즈 드리프트 — 결정 트리와 안티드리프트 락은 `ai-character-drama/references/hellgrind-playbook.md` §4.6.
 - **HARD CUT 마커**: 샷 수를 선언하고 경계 초에 "6.0s HARD CUT."를 박는다. 이 모드에선 멀티샷 위임 문장을 쓰지 않는다 — 샷 설계를 직접 한다.
 - **무브먼트 = 감정 지시**: 관찰·동행 = tracking(피사체 눈높이) / 긴장 홀드 = "static-leaning hold, natural breathing motion" / 관조·이별·데드팬 = static locked-off / 감정 고조·의심 = slow push-in / 규모 리빌 = slow pull-back / 올려다보기 = tilt-up. **줌 금지, 푸시인으로** (줌은 워블 생김). 카메라 유형(handheld/non-fixed)은 FORMAT MODE에 선언하고 클립 내내 유지. 전형 리듬: tracking → static hold → handheld 사건 → push-in 정점 → locked-off 여운. 상세 표는 `higgsfield-structure.md` §3.5.
+- **감정 동기 카메라 4기법 (2026-08-30 — 사란 시장걷기 컷 실측 1회 통과, 프롬프트 바이블 §7 해부 근거)**: 멀티샷 감정 씬에 겹쳐 쓴다.
+  ① **동기 명문화** — 무브를 고르는 데서 멈추지 말고 동기를 프롬프트 문장으로 박는다: "The move is motivated: her hope pulls the camera in." FORMAT MODE에는 씬의 동력원을 선언 ("the camera is alive and motivated by her energy / by the distance between them").
+  ② **화각 곡선** — 샷별 화각을 개별 선택이 아니라 곡선으로 설계 (예: 40→47→29→33→26). 감정이 조여들수록 좁히고, 인물의 첫 정면 프레이밍은 마지막 샷까지 아껴서 보상으로 쓴다.
+  ③ **카메라 편들기** — 인물이 갈라지는 비트에서 카메라가 누구와 함께 멈추는지 선언: "the CAMERA STOPS WITH HER — he keeps moving away INSIDE the frame, shrinking." 떠나는 쪽은 컷으로 지우지 말고 프레임 안에서 작아지게.
+  ④ **도착 동기화** — 푸시인의 도착 순간을 대사의 도착 순간에 묶는다: "landing on her face exactly as the question lands" + 편집점 "Cut ON the question." 마지막 무브는 cm 단위로 절제 ("a final soft drift 20 cm closer") — 훅 들어가면 신파가 된다.
   **핸드헬드는 촬영기사의 몸으로 서술한다** (CINEDANCE): "operator breath,
   micro-settling, weight shifts, shoulder-mounted mass, organic imperfect
   correction" — 기계적 표현(digital jitter, random shake)은 금지, gimbal
@@ -228,7 +231,7 @@ POSITIVE LOCKS     ← 최종 락 블록 (아래) — 통일 스타일 문자열
 
 기본 모드 위에 겹쳐 쓰는 컷 유형별 오버라이드. 출처: higgsfield.ai/blog/seedance-prompting-guide.
 
-**POV (1인칭) 컷** — 카메라가 곧 인물의 눈. 이 컷에서는 **멀티샷 위임 문장을 빼고** 아래로 대체한다 (명시적 부정이 없으면 Seedance가 기본값으로 앵글을 커팅해 시점이 깨진다):
+**POV (1인칭) 컷** — 카메라가 곧 인물의 눈. 이 컷에서는 샷을 나누지 말고 FORMAT MODE에 아래를 선언한다 (명시적 선언이 없으면 Seedance가 기본값으로 앵글을 커팅해 시점이 깨진다):
 
 ```
 One continuous shot, first-person POV perspective. No cuts, no zoom,
@@ -248,6 +251,42 @@ counters with a shoulder throw.
 ```
 
 정상 속도 확립 → 정밀 순간(회피 디테일, 임팩트)만 "RAMPS INTO SLOW MOTION" → "SNAPS BACK". 컷당 램프 1회가 안전선. 스타일 참조는 감독 이름 조합이 잘 먹는다 ("Guy Ritchie speed-ramping with Snyder impact slow-motion") — 단 IP 세이프 원칙상 캐릭터/작품명이 아닌 연출 스타일 참조만.
+
+**원테이크 트래버설/추격 컷 (2026-08-30 — 사란 파쿠르 런 30초 실측 성공).** 컷 없는
+30초 원테이크의 유일한 정규 용법 — 인물이 연결된 공간을 고속으로 통과하며 세계를
+소개하는 컷. duration 규정의 "특수한 원테이크"가 바로 이것. 구성 요소:
+- **연속성 3중 선언**: 헤더에 "a single uninterrupted long take" + CAMERA에 "one
+  continuous move from first frame to last" + NEGATIVE에 "no cuts, no montage, no
+  hidden transitions, no teleportation". 하나라도 빠지면 모델이 몰래 컷한다.
+- **공간 연결 선언**: "Every space is physically connected through stairways,
+  rooftops, awnings, ropes, bridges and doorways." — 원테이크의 생명. 이 선언이
+  없으면 공간이 순간이동으로 이어진다.
+- **화살표 루트 채보 (CONTINUOUS SPATIAL ROUTE)**: 통과 구간 전체를 "A → B → C"
+  화살표 체인으로 명시하고, 구간마다 통과 동작(vault/slide/drop/rope descent)을
+  하나씩 배정한다. 루트가 곧 액션 타임라인이 된다.
+- **카메라 비미러링**: 카메라는 인물의 라인을 복사하지 않고 **자기 라인**을 탄다 —
+  "when she vaults a stall counter, the camera swings through the gap beside it;
+  when she slides under a beam, the camera ducks with a violent dip and rough
+  recovery." 오퍼레이터가 같은 루트를 달리는 실체를 부여하고("like a real camera
+  operator free-running the same route"), 착지엔 졸트("a real landing jolt")를 준다.
+- **기계 카메라 3종 부정**: "must not feel like a gimbal, a drone, or a
+  video-game camera." (A-not-B 허용 예외 — 대안은 오퍼레이터 실체 선언이 담당.)
+- **군중 지연 반응**: "the street is crowded and nobody clears a path in advance —
+  shoppers react with realistic, slightly delayed surprise." AI 군중이 미리 길을
+  비켜주는 클리셰 차단 + 인물은 군중을 지형으로 읽는다("she reads the crowd like
+  terrain").
+- **경로 = 세계 쇼케이스**: 통과하는 배경에 세계 법칙 시연을 심는다 (연습장의
+  원소 화살 3색 시연 등) — 이동 컷이 곧 세계관 소개가 된다.
+- **얼굴 유예 리빌 (선택)**: "seen from behind throughout; her face is never
+  clearly shown until the final beat" + NEGATIVE "no frontal shots before the
+  final beat" — 뒷모습 추적으로 달리다 마지막 비트에서 정지+리빌. identity anchor는
+  등 뒤 디테일(머리·장비)로 잠근다.
+- **no-BGM은 이 컷 유형에도 예외 없이 유지 (2026-08-30 사용자 확정)**: 원테이크
+  트래버설도 no-BGM 클로즈 + 캡션 클로즈를 그대로 넣는다. 스코어의 감정 곡선
+  (달리기 가속 → 정지 순간 정적 → 엔딩 스웰)이 필요하면 프롬프트에 굽지 말고
+  **후반에서 Suno BGM으로** 얹는다 — 그래야 음량·타이밍을 편집에서 통제할 수 있다.
+  프롬프트 안에서는 디제틱 사운드(발소리·숨소리·장비 소리·군중)의 리듬 채보가
+  스코어의 역할을 대신한다.
 
 **인라인 VFX 브래킷** — 마법/에너지/입자 효과는 액션 비트 문장 안에 브래킷으로 박는다:
 
@@ -276,8 +315,8 @@ pulsing with white-blue current] and the lock sparks open.
 
 | 파라미터 | 값 |
 |---|---|
-| model | `seedance_2_0` |
-| duration | 4~15 (기본 15) |
+| model | `seedance_2_0` — 플랫폼이 2.5를 제공하면 2.5 우선 (30초 + 동기화 오디오 + 레퍼런스 50개 + 영역 편집; 파라미터 표기는 플랫폼의 모델 목록에서 실측 확인) |
+| duration | 4~15 (기본 15) — 2.5는 최대 30초. 15초는 3비트 예산 유지. **30초 멀티샷은 정규 패턴이다 (2026-08-30 갱신 — 사란 시장걷기 30초 5샷 대사극 실측 성공)**: 30초 = 5샷 안팎 + 5비트, 샷 경계마다 HARD CUT 타임코드, 비트당 액션 1개 원칙은 동일. 6비트 이상 욱여넣기는 금지. 컷 없는 30초 원테이크는 트래버설/추격 컷 한정 정규 용법 — 특수 컷 레시피 "원테이크 트래버설" 참조 |
 | genre | 기본 `"drama"` — 코미디/액션 컷이어도 내러티브 컷이면 drama가 안전한 기본값이고, 톤은 프롬프트의 톤 키워드가 나른다. 플랫폼이 해당 톤의 genre 값을 별도 지원하면 그걸 쓰되, 한 프로젝트 안에서는 통일 |
 | aspect_ratio | 쇼츠/릴스 → `"9:16"`, 그 외 `"16:9"` — 중간 변경 불가, 처음에 확정. 플랫폼은 `4:3, 1:1, 3:4, 21:9`도 지원 — 21:9는 시네마틱 트레일러 룩에 유효 |
 
@@ -299,6 +338,144 @@ pulsing with white-blue current] and the lock sparks open.
    - `natural skin texture` 삭제 (포토리얼+젊은 인물+피부 묘사 조합에 민감한 필터 존재)
    - 명칭을 한 단계 더 일반화
 3. 어느 플랫폼인지 확인 — 필터 성향이 다르다. 수정본을 줄 때 "바꾼 것" 목록을 명시해 사용자가 원인을 학습하게 한다.
+
+## Seedance 2.5 확장 규격 (2026-08 — Cully Hill Boys 123컷 실측 + 힉스필드 공식 가이드)
+
+힉스필드 공식 스튜디오 장편 「Cully Hill Boys」(137씬 전편 Seedance 생성)의 실제 프롬프트
+123건과 공식 2.5 프롬프팅 가이드(higgsfield.ai/blog/seedance-2-5-prompting-guide)에서 검증된
+확장 도구들. 근거 통계·기법 전문: `~/.claude/skills/higgsfield-seedance-25/references/cully-hill-video-prompt-stats.md`
+(같은 폴더의 production brief·golden sample도 참조). 기본 구조 모드를 대체하지
+않는다 — **멀티컷 장편·시리즈급 통제가 필요할 때 구조 모드 위에 겹쳐 쓰는 증축분**이며,
+어느 것을 쓰든 18,000자 입력 한도 안에서 적용한다 (2026-08-30 사용자 실측 갱신).
+
+**① WORLD STYLE PREFIX — 세계관별 고정 스타일 헤더.** 프로젝트에 서사 축(인물 진영·정서
+온도)이 2개 이상이면, 축마다 OPTICS(렌즈 사다리) + CAMERA(무브 성격) + LIGHTING +
+STYLE + QUALITY + 60:30:10 컬러 배분을 통째로 잠근 프리픽스를 프로젝트 시작 시 설계하고,
+그 세계에 속하는 모든 컷 프롬프트 맨 위에 **한 글자도 안 바꾸고** 복붙한다. 통일 스타일
+문자열의 상위 호환 — 문자열 하나가 아니라 블록 세트를 잠근다. 효과: 룩만으로 "누구의
+세계인지" 읽히고, 컷마다 스타일을 재기술하지 않아도 시리즈 룩이 유지된다.
+(실측 예: 주인공 패거리=광각 몰입 핸드헬드 그라임 / 킬러=8°·18° 초망원 관찰 데드팬 /
+갱단=가이 리치×레픈 / 잃어버린 가족 "Heaven"=따뜻한 화이트+오크.) 골든 샘플:
+`higgsfield-seedance-25/references/golden-sample-style-prefix.md`.
+
+**프리픽스 표준 4줄 공식 (2026-08-30 — 사란 시장걷기 컷 실측 통과, 프롬프트 바이블 §1 해부 근거).**
+새 프리픽스를 설계할 때는 이 4줄 뼈대를 기본형으로 쓴다:
+```
+[① 룩 선언]  <질감어> <퀄리티 방어어> <시대/장르> <매체> look.
+             예: "Gritty high-end medieval television production look."
+[② 장비 줄]  Shot on <카메라> with <렌즈 성격>, <카메라 운용>.
+             예: "Shot on ARRI Alexa 35 with classic spherical rectilinear lenses, operator-carried camera with restrained weight."
+[③ 분위기 줄] <광원+확산 매개>, <muted+실명 색 2개 팔레트+그림자 색>, visible fine film grain, real <장면 재질> physics.
+             예: "Harsh natural desert daylight softened by drifting dust haze, muted sun-bleached palette of ochre and bone with cold slate shadows, visible fine film grain, real fabric and dust physics."
+[④ 인라인 금지] No <이 룩의 반대말> — 시대극 "No modern polish." / 현대물 "No commercial gloss."
+```
+규칙: ①의 질감어(gritty)는 퀄리티 방어어(high-end/prestige)와 반드시 쌍으로 — 단독이면 저예산 룩으로 빠진다.
+③의 팔레트는 `muted` 단독 금지 — 실명 색(ochre and bone 등)과 함께 써야 desaturated化를 피한다.
+카메라 운용은 handheld 단독 대신 "operator-carried … with restrained weight"(프로의 절제된 흔들림).
+검증 변주: 현대 아파트판 "Gritty high-end contemporary television drama look / … / Late-night apartment stillness: one warm range-hood cone, cold city glow, muted palette of oat and charcoal with warm amber highlights, visible fine film grain, real fabric and water physics. / No commercial gloss." (테스트프롬프트_연인싸움)
+
+**①-b WORLD 선언 블록 — 프리픽스의 짝 (2026-08-30, 사란 시리즈 실측).** 스타일
+프리픽스가 "어떻게 찍나"를 잠근다면, WORLD 블록은 "무엇의 세계인가"를 잠근다.
+프로젝트당 1회 설계해 시리즈의 모든 컷에서 프리픽스 바로 다음 자리에 무변경 복붙.
+`WORLD:` 헤더로 시작하는 한 문단, 구성 5층:
+1. **지리** — 장소의 형태와 랜드마크 ("a thriving archers' village carved into a
+   natural sandstone amphitheater … terraces, rope bridges, carved stairways").
+2. **팔레트의 소속** — 색을 나열하지 말고 장소의 속성으로 귀속 ("sun-warmed
+   sandstone in golds, ambers and tans") — 색이 세계에 붙어 있으면 컷마다 안 흔들린다.
+3. **공기** — 그 세계의 상시 대기 ("heat haze, fine golden dust hanging in sunbeams").
+4. **세계 법칙 (범위 잠금)** — 초자연·기술 요소의 발현 범위를 잠그고 금지+대안 쌍으로
+   닫는다 ("each has exactly one elemental gift, expressed only through their
+   arrows … The elements live in arrows alone — no wands, no floating spells").
+   이게 없으면 배경에 규칙 밖 마법·소품이 자란다.
+5. **배경 인구 시그니처 + 톤 비유** — 엑스트라까지 시리즈 컬러 모티프에 편입
+   ("ember-red / deep-blue / violet-white fletchings")하고, 세계의 일상 온도는
+   비유 한 문장으로 ("Archery is everywhere and casual, the way a port town lives
+   with sails").
+LOCATION MAP과의 분업: WORLD는 시리즈 전역의 세계 헌법, LOCATION MAP은 이 컷이
+벌어지는 구체 지점의 지도다 — WORLD를 컷마다 다시 쓰지 말고, LOCATION MAP이 WORLD의
+지명·모티프를 좌표로 받아 쓴다.
+
+**② 퍼센트 좌표 블로킹 (canon settle frame).** 승인된 스틸(키프레임)의 구도를 컷에서
+재현해야 하면, 프레임 내 위치를 좌표로 박는다: "the plate spans x≈33–72%, top edge
+~y≈50%, bottom cropped; the moth lands at the upper-left corner x≈43%, y≈47%, in profile".
+GEO SPATIAL LAYOUT(랜드마크+미터)이 공간의 지도라면 이것은 **화면의 지도** — 정확한 착지
+구도가 승부처인 컷(정물 인서트, 시그니처 구도, 이전 컷 마지막 프레임과의 1:1 매칭)에만
+쓴다. 남용하면 카메라가 경직된다.
+
+**③ ★LOCK★ 명명 조항.** POSITIVE LOCKS의 각 항목에 이름을 붙이고 별표로 감싼다:
+`★SPEAKER LOCK — line 1 HORACE only; non-speakers' mouths CLOSED★`,
+`★ADDRESS LOCK: the stare lands on OLI — never at the lens★`, `★SIZE IS LAW: the moth
+stays 1 cm in every frame★`. 리비전 때 "어느 락이 깨졌는지"를 이름으로 추적·증축할 수
+있게 된다. 실측 어휘: SPEAKER / ADDRESS / BLOCKING / BREAK / INSERT / CROWD / ALIVE
+(자연스러운 깜빡임·호흡) / NOT-IMPRESSED(엔드 프레임 고정) LOCK 등 — 컷의 승부처마다
+자유 명명.
+
+**④ 3중 재진술 — 승부처 조항의 안전장치.** 스튜디오 원본(1만자급 — 웹 입력창이 아닌
+경로로 추정)은 핵심 규칙을 SCENE CONTEXT 1회 + 해당 블록 1회 + 말미 POSITIVE
+CONSTRAINTS 1회, 총 3회 반복한다. 1.8만자 한도(2026-08-30 갱신)에서는 승부처 조항 3~5개를 온전히 3회 반복할 수 있다 — 전 조항 재진술은 여전히 과잉이니, 컷의 생사를
+가르는 것만 고른다.
+
+**⑤ EVENT TRACK — 환경 요소 채보.** 파도·돌풍·군중 이동·배경 차량처럼 인물이 아닌 환경
+요소가 연출에 개입하면, ACTION TIMING과 별도로 타임라인을 채보한다:
+`EVENT TRACK: 2.0s a gust lifts the tarp edge; 5.5s the crowd surges left; 8.6s a distant
+gull cry`. 안 하면 생성마다 랜덤 변동한다 (공식 가이드의 명시 실패 모드). 디제틱 사운드도
+같은 방식으로 타임스탬프를 찍을 수 있다.
+**대사 동기화 + 인지 지시 (2026-08-30, 사란 컷 실측):** 환경 이벤트를 특정 대사의 착지
+순간에 묶고("11.0s one faint crackle between her fletchings AS her spark line lands")
+누가 보고 누가 못 보는지까지 지시하면("unnoticed by both") 관객만 아는 극적 아이러니가
+만들어진다. 복선 이벤트는 "unremarked"(아무도 언급 않음)로 눌러서 배경에 심는다.
+
+**⑥ 시대 락 (시대물 필수).** 배경 연도가 현재가 아니면 "nothing in frame newer than
+[연도] — no smartphones, no modern cars"를 **모든 컷 프롬프트와 모든 로케이션 플레이트에**
+반복한다. 한 번만 쓰면 모델이 현대로 끌고 간다 — "엑스트라 한 명이 폰을 들면 그 샷은 끝"
+(Cully Hill 브리프). QUALITY 블록에 넣는 것이 실측 표준.
+
+**⑦ 매너 문단 — 캐릭터 거동 고정.** 주연마다 "어떻게 서고, 어떻게 말하고, 질 때 얼굴이
+뭘 하는지" 한 문단을 첫 촬영 전에 확정하고 그 인물이 나오는 모든 프롬프트에 붙인다.
+ROCO/CHARACTER ACTING이 컷 단위 연기라면 매너 문단은 **시리즈 단위 인격 고정** — 억양도
+라벨("cockney")이 아니라 조건으로 쓴다 ("th→f/v, dropped h, glottal t, -ing→-in'").
+
+**⑧ 운영 원칙 (2.5 물량 전략).** 스튜디오 실측: 720p Standard로 씬당 수십~수백 테이크를
+돌려 선별하는 것이 1080p 소량보다 낫다 — 프롬프트는 통제를 높이는 도구지 1회 성공을
+보장하는 도구가 아니다. 21:9는 시네마 룩 표준으로 실전 검증됨. 프롬프트 다국어 혼용(영어
+기본 + 한국어/중국어 블록)도 소화되지만, 이 스킬의 기본은 영어 프롬프트 + "등장인물은
+한국어로 말한다" 클로즈 유지.
+
+## 감정 연출 마이크로 기법 (2026-08-30 — 프롬프트 바이블 47엔트리 해부 추출)
+
+사란 "시장걷기 사냥조르기" 컷(실측 1회 통과)을 한 줄 단위로 해부해 추출한 기법.
+감정 비중이 있는 컷에 골라 겹친다 (전부 의무는 아님 — 컷의 승부처에만).
+
+1. **감정 출구 배선** — 감정 표현을 금지만 하지 말고 **허용 출구를 같이 배선**한다:
+   "no tears — the desperation lives only in her cracking voice and white knuckles."
+   금지(눈물) + 출구(목소리·손마디·한숨/헛웃음)를 한 문장에. 출구가 없으면 모델이
+   금지를 뚫거나 감정 자체를 지운다. 결말 감정도 캐릭터 문법으로 번역해 지정
+   ("the gruff kid's version of heartbreak, dry-eyed").
+2. **횟수 연출 (count-as-drama)** — 아껴야 클라이맥스가 되는 동작(시선·돌아봄·미소·
+   접촉)은 횟수+시각을 잠근다: "he looks back exactly ONCE — at 24.5s." 반대로
+   "for the first time in the whole walk"로 **첫 허락**을 명시하면 그 순간에 무게가
+   실린다. 양보·무너짐의 분량도 계량한다 ("for one line the gruffness cracks").
+3. **금지+예외 열거 락** — 전면 금지가 필요하지만 예외가 있는 요소는 "전부 금지 +
+   허용 예외를 시각까지 열거"로 쓴다: "no flames anywhere — the only elemental
+   events are one faint crackle at 11.0s and one distant bloom at 22.5s." 모호한
+   부분 허용보다 훨씬 안정적이다.
+4. **연기 해석 표지판** — 오독 가능한 감정 순간마다 "A가 아니라 B" 표지판을 박는다:
+   "a promise, not a brush-off", "not triumph but reassurance", "his dismissal is
+   administrative, not hostile." 같은 대사도 이 한 절로 정반대 연기가 갈린다.
+5. **조명 감정 곡선** — 캐치라이트를 샷 단위로 배정한다 ("visible catchlights in her
+   eyes in shots 1, 2 and 5" — 거절당하는 3·4에는 없음). 조명 효과는 따로 만들지
+   말고 **무브 × 광원 배치의 곱셈**으로 얻는다 ("the arcing camera crossing the
+   sun shafts makes the light pulse naturally over their faces").
+6. **사운드 캐릭터화** — 폴리에도 인물별 형용사를 배정한다: "two pairs of footsteps
+   on stone — his slow and even, hers quick and eager." PHYSICS의 보폭 형용사를
+   AUDIO에 그대로 이식하면 소리에도 성격이 실린다.
+7. **배경 연기 상한 + 소품 의미** — 조연 리액션은 "~하되 ~는 아니다"로 상한을 긋는다
+   ("mock-weary, zero real annoyance", "fond background rhythm, never
+   scene-stealing"). 감정 소품은 의미까지 지정한다 ("the date is consolation") —
+   던지는 손의 표정이 달라진다.
+8. **대문자 = 볼륨** — 대문자는 프롬프트의 볼륨 노브다. 사고 다발 지점의 핵심 단어만
+   선별적으로 올린다 (EXACT, BOTH, ONCE, INSIDE, DEAD, BACKWARDS, TALKED).
+   문장 전체 대문자 남발은 볼륨을 도로 죽인다.
 
 ## 연계
 

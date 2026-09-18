@@ -187,7 +187,8 @@ the king holding <<<bottle>>>.                    ← 소품도 손에 쥔 상�
 10-15초: [비트 3 — 리액션으로 끝]
 등장인물은 한국어로 말한다.                          ← 언어 클로즈 (필수)
 멀티샷 연출 지시문 (아래 참조)                       ← 커버리지 지시 (필수)
-no background music, no BGM, no soundtrack —      ← no-BGM 클로즈 (필수, 마지막 줄)
+no background music, no BGM, no music track, no soundtrack — ← no-BGM 클로즈 (필수)
+no captions, no subtitles, no on-screen text       ← 캡션 클로즈 (전 컷 필수, 마지막 줄)
 only spoken dialogue and natural diegetic sound.
 ```
 
@@ -234,6 +235,19 @@ the action and dramatic beats; dynamic cinematic coverage.
 특정 순간에 특정 샷이 꼭 필요하면 그 비트 안에 한 번만 박아라
 ("10-15초: close-up — the minister's deadpan stare"). 전 비트에 샷을 지정하면
 오히려 뚝뚝 끊긴다.
+
+### 감정 동기 카메라 4기법 (2026-08-30 — 사란 시장걷기 컷 실측 1회 통과)
+
+멀티샷 감정 씬에서 무브를 감정의 집행자로 쓰는 확장 기법. 어휘 표를 대체하지 않고 그 위에 겹친다.
+
+1. **동기 명문화** — 무브 선택에서 멈추지 말고 동기를 문장으로 박는다: "The move is motivated: her hope pulls the camera in." FORMAT MODE에 씬의 동력원 선언("the camera is alive and motivated by her energy").
+2. **화각 곡선** — 샷별 화각을 곡선으로 설계(예: 40→47→29→33→26). 감정이 조여들수록 좁히고, 첫 정면 프레이밍은 마지막 샷까지 아껴 보상으로 쓴다.
+3. **카메라 편들기** — 인물이 갈라지는 비트에서 "the CAMERA STOPS WITH HER — he keeps moving away INSIDE the frame, shrinking." 떠나는 쪽은 컷으로 지우지 말고 프레임 안에서 작아지게.
+4. **도착 동기화** — 푸시인 도착 = 대사 도착("landing on her face exactly as the question lands") + "Cut ON the question." 마지막 무브는 cm 단위 절제("a final soft drift 20 cm closer").
+
+### 감정 연출 마이크로 기법 (2026-08-30 — 프롬프트 바이블 해부 추출, 요약)
+
+① 감정 출구 배선: 금지+허용 출구를 한 문장에 ("no tears — the desperation lives only in her cracking voice and white knuckles"). ② 횟수 연출: 클라이맥스 동작은 횟수+시각 잠금("exactly ONCE at 24.5s"), 첫 허락 명시("for the first time in the whole walk"), 무너짐 분량 계량("for one line the gruffness cracks"). ③ 금지+예외 열거 락: 전면 금지 뒤 허용 예외를 시각까지 열거. ④ 연기 해석 표지판: "a promise, not a brush-off"식 A-not-B로 오독 차단. ⑤ 조명 감정 곡선: 캐치라이트를 샷 단위 배정, 조명 변화는 무브×광원 곱셈으로. ⑥ 사운드 캐릭터화: 폴리에 인물별 형용사. ⑦ 배경 연기 상한("mock-weary, zero real annoyance") + 소품 의미 지정("the date is consolation"). ⑧ 대문자는 볼륨 노브 — 핵심 단어만 선별 승압. 전문은 seedance-cut-prompt SKILL.md 동명 섹션.
 
 ### 블로킹 — 공간 관계를 말로 그려라
 
@@ -430,14 +444,15 @@ The king clutches the bottle protectively.
 [ ] 지배 감정 하나? 연기 부사 붙었나? 마지막 비트가 리액션인가?
 [ ] 블로킹: 누가 어디에·소품이 누구 손에 있는지 명시됐나?
 [ ] 블로킹 락: 같은 장소 2컷+ 씬이면 고정 블로킹 문장(screen-left/right + 방향 + 180도 축)이 그 씬 모든 컷에 동일하게 들어갔는가? (지리 복잡하면 GEO SPATIAL LAYOUT 블록으로)
-[ ] 멀티샷 위임 지시문 + 언어 클로즈 + no-BGM 클로즈(마지막 줄) 3종 세트 있는가?
+[ ] 멀티샷 위임 지시문 + 언어 클로즈 + no-BGM 클로즈("no music track" 포함) + 캡션 클로즈("no captions") 4종 세트 있는가?
 [ ] Seedance 불가능 목록(정확한 글자/4인 이상/복잡한 손동작) 요구하고 있지 않은가?
-[ ] 길이: 120~250단어 사이인가? 250 초과면 가치 낮은 절부터 잘라라 (희석 방지)
+[ ] 길이: 구조 모드 15초 컷 400~600단어인가? 2.5 확장 규격은 ~18,000자(2026-08-30 사용자 실측) 안인가? `wc -m` 실측했나? 통제에 기여하지 않는 수사가 남아 있으면 잘라라 (희석 방지)
 [ ] 긍정형: "does NOT ..."류 부정 액션이 없는가? (락 블록 "A, not B" 쌍 예외)
 [ ] 나이: 젊은/아동 캐릭터에 나이 표기가 없는가? (성인 나이대만 허용)
 [ ] 연기: 감정 단어 대신 근육·몸·숨으로 썼는가? 캐릭터에 목표 동사가 있는가? (acting-system.md §9)
 [ ] 컨텍스트 격리: 스테일 @태그·씬 요약·"previously"류가 없는가?
 [ ] 씬 첫 컷이면: 첫 1초 배치 고정 와이드가 있는가? 이음새 컷이면 직전 대사 꼬리를 넣었는가?
+[ ] NEGATIVE 블록: 말미에 주제별 클러스터로 있나? 전역 금지가 샷 지시와 충돌하지 않나? 승부처 금지는 3중 재진술(선행 금지→★LOCK★→NEGATIVE)로 조였나?
 
 스토리 (바이블/스토리보드 단계)
 [ ] 컷1 첫 3초가 행동/의문으로 시작하는가?
